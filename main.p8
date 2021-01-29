@@ -20,26 +20,68 @@ items["coin"] = {
 
 items["gem"] = {
 	t="treasure",
-	p=0.2,
+	p=0.3,
 	value=2
+}
+
+items["gold"] = {
+	t="treasure",
+	p=0.5,
+	value=1
+}
+
+items["key"] = {
+	t="treasure",
+	p=0.7,
+	value=0.5
+}
+
+items["chest"] = {
+	t="treasure",
+	p=0.2,
+	value=3
 }
 
 -- trap
 items["snake"] = {
 	t="trap",
-	p=0.2,
+	p=0.5,
 	damage=1
+}
+
+items["spike trap"] = {
+	t="trap",
+	p=0.2,
+	damage=2
+}
+
+items["crystal skull"] = {
+	t="trap",
+	p=0.1,
+	damage=3
 }
 
 -- equipment
 items["pickaxe"] = {
 	t="equipment",
 	p=0.2,
-	uses=1,
+	uses=2,
+	area=1
+}
+
+items["the vision"] = {
+	t="equipment",
+	p=0.5,
+	uses=3,
 	area=0
 }
 
-
+items["Dinomite"] = {
+	t="equipment",
+	p=0.1,
+	uses=1,
+	area=2
+}
 
 function _init()
 	for x=1,8 do
