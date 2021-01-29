@@ -2,13 +2,30 @@ pico-8 cartridge // http://www.pico-8.com
 version 29
 __lua__
 
-world = {}
+local world = {}
+local c = {x=4, y=3}
+
+local items = {}
+
+items["coin"] = {
+	-- probability to spawn
+	-- for testing increase probability to spawn
+	p = 0.1
+}
+
+items[""] = {
+	p = 0.2
+}
+
 
 function _init()
 	for x=1,8 do
 		add(world, {})
-		for y=1,7 do
-			add(world[x], {c=rnd(15)+1})
+		for y=1,8 do
+			add(world[x], {
+
+				c=rnd(15)+1}
+			)
 		end
  end
 end
@@ -17,18 +34,32 @@ end
 function _update()
 	-- left
 	if (btn(0)) then
-
+		c.x = c.x-1
 	end
 	-- right
 	if (btn(1)) then
-
+		c.x = c.x+1
 	end
 	-- up
 	if (btn(2)) then
-
+		c.y = c.y-1
 	end
 	-- down
 	if (btn(3)) then
+		c.y = c.y+1
+	end
+
+	if c.x<1 then c.x=1 end
+	if c.x>8 then c.x=8 end
+	if c.y<1 then c.y=1 end
+	if c.y>8 then c.y=8 end
+
+	-- z
+	if (btn(4)) then
+
+	end
+	-- x
+	if (btn(5)) then
 
 	end
 end
@@ -37,12 +68,16 @@ end
 function _draw()
 	cls()
  for x=1,8 do
-		for y=1,7 do
+		for y=1,8 do
 			tx=x-1
 			ty=y-1
 			rect(tx*16,ty*16,tx*16+15,ty*16+15,world[x][y].c)
 		end
  end
+
+	cx = c.x-1
+	cy = c.y-1
+	rectfill(cx*16,cy*16,cx*16+15,cy*16+15,world[c.x][c.y].c)
 end
 
 __gfx__
