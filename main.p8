@@ -2,10 +2,10 @@ pico-8 cartridge // http://www.pico-8.com
 version 29
 __lua__
 
-local world = {}
-local c = {x=4, y=3}
+world = {}
+c = {x=4, y=3}
 
-local items = {}
+items = {}
 
 -- treasure
 items["coin"] = {
@@ -15,80 +15,108 @@ items["coin"] = {
 	p=0.3,
 	value=1,
 	-- sprite
-	s=32
+	s=1
 }
 
-items["gem"] = {
+add(items, {
 	t="treasure",
+	name="gem",
 	p=0.3,
-	value=2
-}
+	value=2,
+	s=2
+})
 
-items["gold"] = {
+add(items, {
 	t="treasure",
+	name="gold",
 	p=0.5,
-	value=1
-}
+	value=1,
+	s=3
+})
 
-items["key"] = {
+add(items, {
 	t="treasure",
+	name="key",
 	p=0.7,
-	value=0.5
-}
+	value=0.5,
+	s=4
+})
 
-items["chest"] = {
+add(items, {
 	t="treasure",
+	name="chest",
 	p=0.2,
-	value=3
-}
+	value=3,
+	s=5
+})
 
 -- trap
-items["snake"] = {
+add(items, {
 	t="trap",
+	name="snake",
 	p=0.5,
-	damage=1
-}
+	damage=1,
+	s=6
+})
 
-items["spike trap"] = {
+add(items, {
 	t="trap",
+	name="spikes",
 	p=0.2,
-	damage=2
-}
+	damage=2,
+	s=7
+})
 
-items["crystal skull"] = {
+add(items, {
 	t="trap",
+	name="skull",
 	p=0.1,
-	damage=3
-}
+	damage=3,
+	s=8
+})
 
 -- equipment
-items["pickaxe"] = {
+add(items, {
 	t="equipment",
+	name="pickaxe",
 	p=0.2,
 	uses=2,
-	area=1
-}
+	area=1,
+	s=9
+})
 
-items["the vision"] = {
+add(items, {
 	t="equipment",
+	name="vision",
 	p=0.5,
 	uses=3,
-	area=0
-}
+	area=0,
+	s=10
+})
 
-items["Dinomite"] = {
+add(items, {
 	t="equipment",
+	name="dynamite",
 	p=0.1,
 	uses=1,
-	area=2
-}
+	area=2,
+	s=11
+})
+
+
+function rnd_item()
+	-- print(rnd(#items))
+	return items[flr(rnd(#items))+1]
+end
 
 function _init()
 	for x=1,8 do
 		add(world, {})
 		for y=1,8 do
+			item=rnd_item()
+			-- print(item.name)
 			add(world[x], {
-
+				t=item,
 				c=rnd(15)+1}
 			)
 		end
@@ -136,7 +164,11 @@ function _draw()
 		for y=1,8 do
 			tx=x-1
 			ty=y-1
-			rect(tx*16,ty*16,tx*16+15,ty*16+15,world[x][y].c)
+			-- rect(tx*16,ty*16,tx*16+15,ty*16+15,world[x][y].c)
+
+			spr(world[x][y].t.s,tx*16,ty*16)
+			spr(world[x][y].t.s+1,(tx+1)*16,ty*16)
+
 		end
  end
 
