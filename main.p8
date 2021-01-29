@@ -5,7 +5,16 @@ __lua__
 local world = {}
 local c = {x=4, y=3}
 
+local tile = {}
+
 local items = {}
+-- the standard tile. it will be the original tile pluss if the dig
+--comes up with nothing
+tile["grass1"] = {
+	t="tile",
+	p=0.7,
+	value=0,
+}
 
 -- treasure
 items["coin"] = {
