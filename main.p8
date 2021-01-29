@@ -10,7 +10,7 @@ local items = {}
 items["coin"] = {
 	-- probability to spawn
 	-- for testing increase probability to spawn
-	p = 0.1
+	p = 0.3
 }
 
 items[""] = {
