@@ -2,12 +2,47 @@ pico-8 cartridge // http://www.pico-8.com
 version 29
 __lua__
 
-local one = 1
-local two = 2
+world = {}
 
-print("hello world")
+function _init()
+	for x=1,8 do
+		add(world, {})
+		for y=1,7 do
+			add(world[x], {c=rnd(15)+1})
+		end
+ end
+end
 
-function test()
+
+function _update()
+	-- left
+	if (btn(0)) then
+
+	end
+	-- right
+	if (btn(1)) then
+
+	end
+	-- up
+	if (btn(2)) then
+
+	end
+	-- down
+	if (btn(3)) then
+
+	end
+end
+
+
+function _draw()
+	cls()
+ for x=1,8 do
+		for y=1,7 do
+			tx=x-1
+			ty=y-1
+			rect(tx*16,ty*16,tx*16+15,ty*16+15,world[x][y].c)
+		end
+ end
 end
 
 __gfx__
