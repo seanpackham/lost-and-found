@@ -7,15 +7,38 @@ local c = {x=4, y=3}
 
 local items = {}
 
+-- treasure
 items["coin"] = {
+	t="treasure",
 	-- probability to spawn
 	-- for testing increase probability to spawn
-	p = 0.3
+	p=0.3,
+	value=1,
+	-- sprite
+	s=32
 }
 
-items[""] = {
-	p = 0.2
+items["gem"] = {
+	t="treasure",
+	p=0.2,
+	value=2
 }
+
+-- trap
+items["snake"] = {
+	t="trap",
+	p=0.2,
+	damage=1
+}
+
+-- equipment
+items["pickaxe"] = {
+	t="equipment",
+	p=0.2,
+	uses=1,
+	area=0
+}
+
 
 
 function _init()
