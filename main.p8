@@ -291,6 +291,7 @@ function _update()
 
 		if tile.dug then
 			-- play already dug sound
+			sfx(7)
 		else
 			world[c.x][c.y].dug=true
 			inventory[selected].uses-= 1
@@ -302,10 +303,12 @@ function _update()
 
 				if tile.t.treasure then
 					-- play treasure sound
+					sfx(6)
 					money += tile.t.value
 				end
 				if tile.t.trap then
 					-- play trap soundz
+					sfx(4)
 					workers -= tile.t.damage
 				end
 
