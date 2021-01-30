@@ -36,7 +36,7 @@ key = {
 	t="treasure",
 	name="key",
 	p=1,
-	value=0.5,
+	value=1,
 	s=36
 }
 
@@ -45,7 +45,7 @@ key = {
 add(items, {
 	t="tile",
 	name="rock1",
-	p=3,
+	p=2,
 	value=0,
 	s=2
 })
@@ -63,7 +63,7 @@ add(items, {
 add(items, {
 	t="treasure",
 	name="gold",
-	p=2,
+	p=3,
 	value=1,
 	s=32
 })
@@ -71,7 +71,7 @@ add(items, {
 add(items, {
 	t="treasure",
 	name="skull",
-	p=2,
+	p=1,
 	damage=3,
 	s=64
 })
@@ -89,7 +89,7 @@ add(items, {
 add(items, {
 	t="trap",
 	name="snake",
-	p=2,
+	p=1,
 	damage=1,
 	s=66
 })
@@ -97,7 +97,7 @@ add(items, {
 add(items, {
 	t="trap",
 	name="spikes",
-	p=2,
+	p=1,
 	damage=2,
 	s=68
 })
@@ -107,7 +107,7 @@ add(items, {
 add(items, {
 	t="equipment",
 	name="pickaxe",
-	p=1,
+	p=2,
 	uses=2,
 	area=1,
 	s=100
@@ -116,7 +116,7 @@ add(items, {
 add(items, {
 	t="equipment",
 	name="vision",
-	p=1,
+	p=2,
 	uses=3,
 	area=0,
 	s=96
