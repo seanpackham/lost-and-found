@@ -234,15 +234,15 @@ function _init()
 
 	-- entities
 	add_loot("coin", 			5, 1, 32)
-	add_loot("rock", 			4, 1, 2)
-	add_loot("gold", 			3, 5, 12)
-	add_loot("gem", 				2, 10, 34)
+	add_loot("rock", 			4, 5, 2)
+	add_loot("gold", 			3, 10, 12)
+	add_loot("gem", 				2, 15, 34)
 	add_loot("chest", 		2, 20, 40)
 	add_loot("skull", 		1, 25, 48)
 	add_trap("snake", 		3, 1, 66)
 	add_trap("spikes", 	1, 2, 14)
-	add_trap("spider", 	3, 1, 70)
-	add_trap("boulder", 1, 2, 72)
+	add_trap("spider", 	2, 1, 70)
+	add_trap("boulder", 2, 2, 72)
 	add_trap("skull", 		1, 2, 64)
 
 	-- items
@@ -288,7 +288,7 @@ function next_level()
 
 			-- spawn loot or trap
 			-- todo: base on level
-			if (rnd(1) < 0.60) then
+			if (rnd(1) < 0.65) then
 				tile.e = spawns[flr(rnd(#spawns)) + 1]
 			end
 
