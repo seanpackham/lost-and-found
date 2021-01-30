@@ -221,6 +221,10 @@ end
 
 
 function _update()
+	if workers <= 0 then
+		return
+	end
+
 	if (not left and btn(0)) then
 		c.x = c.x-1
 	end
@@ -296,7 +300,7 @@ function draw_sprite(s, x, y)
 end
 
 function _draw()
-	cls()
+	cls(13)
 
 	-- world
  for x=1,8 do
@@ -347,11 +351,16 @@ function _draw()
 	print("😐 " .. workers, 90, 7*16+2)
 	print("$ " .. money, 90, 7*16+10)
 
-
 	-- cursor
 	cx = c.x-1
 	cy = c.y-1
 	rect(cx*16,cy*16,cx*16+15,cy*16+15,15)
+
+	if workers <= 0 then
+		rectfill(28, 28, 100, 100, 1)
+
+		print("game over", 47, 62, 7)
+	end
 end
 
 __gfx__
