@@ -3,8 +3,10 @@ version 29
 __lua__
 
 world = {}
-items = {}
+grass = {}
 tiles = {}
+items = {}
+
 probs = {}
 
 level = 1
@@ -14,7 +16,7 @@ c = {x=4, y=3}
 
 -- grass
 
-add(tiles, {
+add(grass, {
 	t="tile",
 	name="grass2",
 	p=1,
@@ -22,7 +24,7 @@ add(tiles, {
 	s=6
 })
 
-add(tiles, {
+add(grass, {
 	t="tile",
 	name="grass1",
 	p=1,
@@ -40,9 +42,9 @@ key = {
 	s=36
 }
 
--- random spawn items
+-- random spawn tiles
 
-add(items, {
+add(tiles, {
 	t="tile",
 	name="rock1",
 	p=2,
@@ -50,7 +52,7 @@ add(items, {
 	s=2
 })
 
-add(items, {
+add(tiles, {
 	t="tile",
 	name="rock2",
 	p=1,
@@ -60,7 +62,7 @@ add(items, {
 
 -- treasuer
 
-add(items, {
+add(tiles, {
 	t="treasure",
 	name="gold",
 	p=3,
@@ -68,7 +70,7 @@ add(items, {
 	s=32
 })
 
-add(items, {
+add(tiles, {
 	t="treasure",
 	name="skull",
 	p=1,
@@ -76,7 +78,7 @@ add(items, {
 	s=64
 })
 
-add(items, {
+add(tiles, {
 	t="treasure",
 	name="chest",
 	p=1,
@@ -86,7 +88,7 @@ add(items, {
 
 -- traps
 
-add(items, {
+add(tiles, {
 	t="trap",
 	name="snake",
 	p=1,
@@ -94,7 +96,7 @@ add(items, {
 	s=66
 })
 
-add(items, {
+add(tiles, {
 	t="trap",
 	name="spikes",
 	p=1,
@@ -102,10 +104,10 @@ add(items, {
 	s=68
 })
 
--- equipment
+-- items
 
 add(items, {
-	t="equipment",
+	t="item",
 	name="pickaxe",
 	p=2,
 	uses=2,
@@ -114,7 +116,7 @@ add(items, {
 })
 
 add(items, {
-	t="equipment",
+	t="item",
 	name="vision",
 	p=2,
 	uses=3,
@@ -123,7 +125,7 @@ add(items, {
 })
 
 add(items, {
-	t="equipment",
+	t="item",
 	name="dynamite",
 	p=1,
 	uses=1,
@@ -136,7 +138,7 @@ function _init()
 	-- music(0)
 
 	-- tile spawn probability
-	for k,tile in pairs(items) do
+	for k,tile in pairs(tiles) do
 		for i=1,tile.p do
 			-- print(tile.name)
 			add(probs, tile)
@@ -152,7 +154,7 @@ function _init()
 				add(world[x], { t=probs[flr(rnd(#probs))+1] })
 			-- else just grass
 			else
-					add(world[x], { t=tiles[flr(rnd(#tiles))+1] })
+					add(world[x], { t=grass[flr(rnd(#grass))+1] })
 			end
 		end
  end
