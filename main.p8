@@ -2,12 +2,221 @@ pico-8 cartridge // http://www.pico-8.com
 version 29
 __lua__
 
-local one = 1
-local two = 2
+world = {}
+grass = {}
+tiles = {}
+items = {}
 
-print("hello world")
+probs = {}
 
-function test()
+level = 1
+
+
+c = {x=4, y=3}
+
+-- grass
+
+add(grass, {
+	t="tile",
+	name="grass2",
+	p=2,
+	value=0,
+	s=6
+})
+
+add(grass, {
+	t="tile",
+	name="grass1",
+	p=2,
+	value=0,
+	s=4
+})
+
+-- special item
+
+key = {
+	t="treasure",
+	name="key",
+	p=1,
+	value=1,
+	s=36
+}
+
+-- random spawn tiles
+
+add(tiles, {
+	t="tile",
+	name="rock1",
+	p=1,
+	value=0,
+	s=2
+})
+
+add(tiles, {
+	t="tile",
+	name="rock2",
+	p=1,
+	value=0,
+	s=2
+})
+
+-- treasuer
+
+add(tiles, {
+	t="treasure",
+	name="gold",
+	p=3,
+	value=1,
+	s=32
+})
+
+add(tiles, {
+	t="treasure",
+	name="skull",
+	p=1,
+	damage=3,
+	s=64
+})
+
+add(tiles, {
+	t="treasure",
+	name="chest",
+	p=1,
+	value=3,
+	s=38
+})
+
+-- traps
+
+add(tiles, {
+	t="trap",
+	name="snake",
+	p=1,
+	damage=1,
+	s=66
+})
+
+add(tiles, {
+	t="trap",
+	name="spikes",
+	p=1,
+	damage=2,
+	s=68
+})
+
+-- items
+
+add(items, {
+	t="item",
+	name="pickaxe",
+	p=2,
+	uses=2,
+	area=1,
+	s=100
+})
+
+add(items, {
+	t="item",
+	name="vision",
+	p=2,
+	uses=3,
+	area=0,
+	s=96
+})
+
+add(items, {
+	t="item",
+	name="dynamite",
+	p=1,
+	uses=1,
+	area=2,
+	s=98
+})
+
+
+function _init()
+	-- music(0)
+
+	-- tile spawn probability
+	for k,tile in pairs(tiles) do
+		for i=1,tile.p do
+			-- print(tile.name)
+			add(probs, tile)
+		end
+	end
+
+	-- print(#probs)
+	for x=1,8 do
+		add(world, {})
+		for y=1,8 do
+			-- 75% chance to spawn an item
+			if (rnd(1) < 0.60) then
+				add(world[x], { t=probs[flr(rnd(#probs))+1] })
+			-- else just grass
+			else
+					add(world[x], { t=grass[flr(rnd(#grass))+1] })
+			end
+		end
+ end
+
+end
+
+
+function _update()
+	-- left
+	if (btn(0)) then
+		c.x = c.x-1
+	end
+	-- right
+	if (btn(1)) then
+		c.x = c.x+1
+	end
+	-- up
+	if (btn(2)) then
+		c.y = c.y-1
+	end
+	-- down
+	if (btn(3)) then
+		c.y = c.y+1
+	end
+
+	if c.x<1 then c.x=1 end
+	if c.x>8 then c.x=8 end
+	if c.y<1 then c.y=1 end
+	if c.y>8 then c.y=8 end
+
+	-- z
+	if (btn(4)) then
+		sfx(3)
+	end
+	-- x
+	if (btn(5)) then
+		sfx(0)
+	end
+end
+
+
+function _draw()
+	cls()
+ for x=1,8 do
+		for y=1,7 do
+			s=world[x][y].t.s
+
+			tx=x-1
+			ty=y-1
+
+			sx=(s%32)*8
+			sy=flr(s/32)*16
+
+			sspr(sx,sy,16,16,
+				tx*16,ty*16)
+
+		end
+ end
+
+	cx = c.x-1
+	cy = c.y-1
+	rect(cx*16,cy*16,cx*16+15,cy*16+15,15)
 end
 
 __gfx__
@@ -82,3 +291,15 @@ __map__
 0000000000000101000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000001010101000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000001000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+__sfx__
+001400200d0200e5200a7200e520003200e5200032009520115200f5200d5200852008520145200d720003201472019720197200132000320055200a3200b520145201752014720157201e7200a0201402000020
+000a002003100274103341002310061001641003300033000510000700294103141003310007000d410023000910000700033002a410304100331003300144100610001700033002b4102e41002310033000b410
+001e00200e71010710127100001017510000101f5100001019510000101a71017710127100001022510000101f510000101a7101c7101f710227100001020510000101f510000102051014710117101371019710
+0002000003550025500865004650065500665007650096500b550096500a5500d6500d5500e6500c6500000000000000000000000000010000100001000010000100001000000000000000000000000000000000
+__music__
+00 02404242
+00 02404344
+00 00414344
+00 01424344
+00 01004344
+
