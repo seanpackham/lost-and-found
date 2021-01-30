@@ -2,25 +2,23 @@ pico-8 cartridge // http://www.pico-8.com
 version 29
 __lua__
 
-world = nil
--- grass tiles
-grass = {}
--- items
-items = {}
--- spawn tiles: treasure and trap
-tiles = {}
-
 debug=false
 
--- spawn probs for tiles
-probs = {}
+world = nil
+probs = nil
+gameover=false
+shop=false
+delay=0
 
 inventory = {}
 selected=1
-
 level = 1
 workers = 4
 money = 100
+
+grass = {}
+items = {}
+tiles = {}
 
 up=false
 down=false
@@ -30,9 +28,6 @@ zz=false
 xx=false
 
 c = {x=4, y=3}
-
-shop = false
-shop_delay = 0
 
 -- special item
 
@@ -178,7 +173,10 @@ add(items, {
 })
 
 function worldgen()
-	world={}
+	world = {}
+	gameover=false
+	shop=false
+	delay=0
 
 	-- tile spawn probability
 	for k,tile in pairs(tiles) do
@@ -211,6 +209,13 @@ end
 function _init()
 	-- music(0)
 
+	inventory = {}
+	probs = {}
+	selected=1
+	level = 1
+	workers = 4
+	money = 100
+
 	-- draw black pixels
 	palt(0, false)
 	palt(13, true)
@@ -228,9 +233,23 @@ end
 
 
 function _update()
+
+	-- game over
 	if workers <= 0 then
+		gameover=true
+		-- play gameover sound
+	end
+
+	if gameover then
+		if (not xx and btn(5)) then
+			_init()
+
+		end
+
 		return
 	end
+
+	-- shop
 
 	if inventory[1].uses <= 0 then
 		shop=true
@@ -238,9 +257,9 @@ function _update()
 	end
 
 	if shop then
-			shop_delay+=1
+			delay+=1
 
-			if shop_delay > 30*2 then
+			if delay > 30*2 then
 				-- shop logic
 
 				-- buy
@@ -248,8 +267,6 @@ function _update()
 				-- exit
 				if (not xx and btn(5)) then
 					worldgen()
-					shop=false
-					shop_delay=0
 
 					-- temp
 					inventory[1].uses=9
@@ -258,6 +275,8 @@ function _update()
 
 			return
 	end
+
+	-- game
 
 	if (not left and btn(0)) then
 		c.x = c.x-1
@@ -339,8 +358,10 @@ end
 function _draw()
 	cls(13)
 
-	if shop and shop_delay > 30*2 then
-		print("shop", 47, 62, 7)
+	if shop and delay > 30*2 then
+		print("do you have treasure to trade?", 4, 8, 7)
+		sspr(0,64,32,32, 32,12,64,64)
+		print("x to leave", 44, 120, 7)
 		return
 	end
 
@@ -359,13 +380,15 @@ function _draw()
 			tile=world[x][y]
 
 			if debug or tile.dug then
-				if tile.t then
-					s=tile.t.s
+				if tile.dug then
+					s=dug.s
 					sx=(s%32)*8
 					sy=flr(s/32)*16
 					draw_sprite(s, tx*16, ty*16)
-				elseif tile.dug then
-					s=dug.s
+				end
+
+				if tile.t then
+					s=tile.t.s
 					sx=(s%32)*8
 					sy=flr(s/32)*16
 					draw_sprite(s, tx*16, ty*16)
@@ -400,7 +423,9 @@ function _draw()
 
 	if workers <= 0 then
 		rectfill(28, 28, 100, 100, 1)
-		print("game over", 47, 62, 7)
+		print("game over", 47, 58, 7)
+		print("x to restart", 42, 70, 7)
+
 	end
 end
 
@@ -524,4 +549,3 @@ __music__
 00 00414344
 00 01424344
 00 01004344
-
