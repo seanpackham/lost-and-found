@@ -67,6 +67,7 @@ game = {
 		-- inventory
 		if (not keys[5] and btn(5)) then
 			state = inventory
+			-- state = shop
 		end
 
 		-- shop
@@ -105,14 +106,14 @@ game = {
 		local iy = 7 * 16
 		rect(ix * 16, iy, ix * 16 + 15, iy + 15, 15)
 
-		-- ui
-		print("😐 " .. workers, 90, 7*16+2)
-		print("$ " .. money, 90, 7*16+10)
-
 		-- cursor
 		local cx = cursor.x - 1
 		local cy = cursor.y - 1
 		rect(cx * 16, cy * 16, cx * 16 + 15, cy * 16 + 15, 15)
+
+		-- ui
+		ui.draw()
+
 	end
 }
 
@@ -139,9 +140,31 @@ inventory = {
 	end
 }
 
+ui = {
+	draw = function()
+		print("😐 " .. workers, 100, 7 * 16 + 2, 7)
+		print("$ " .. money, 100, 7 * 16 + 10, 7)
+	end
+}
 
 shop = {
 	update = function()
+		if (not keys[0] and btn(0)) then item -= 1 end
+		if (not keys[1] and btn(1)) then item += 1 end
+		if (not keys[2] and btn(2)) then item -= 1 end
+		if (not keys[3] and btn(3)) then item += 1 end
+
+		item = clamp(item, 1, #items)
+
+		-- buy
+		if not keys[4] and btn(4) then
+			if money > items[item].value then
+				money -= items[item].value
+				items[item].uses += 1
+			end
+		end
+
+		-- back to game
 		if not keys[5] and btn(5) then
 			state = game
 		end
@@ -154,10 +177,15 @@ shop = {
 		print("x to exit", 45, 115, 7)
 
 		for k, v in pairs(items) do
-			draw_sprite(v.sprite, (k + 1) * 16, 82)
-			print("$" .. v.value, (k + 1) * 16 + 2, 100)
+			local y = 82
+			local z = 7
+			print(v.uses, k * 16 + 6, y, 7)
+			draw_sprite(v.sprite, k * 16, y + z)
+			print("$" .. v.value, k * 16 + 2, y + z + 18, 7)
+			rect(item * 16, y + z, item * 16 + 15, y + z + 15, 15)
 		end
 
+		ui.draw()
 	end
 }
 
@@ -191,7 +219,7 @@ function _init()
 	items = {}
 	keys = {}
 	cursor = { x = 4, y = 3 }
-	item = 2
+	item = 1
 	level = 1
 	workers = 10
 	money = 25
@@ -221,7 +249,7 @@ function _init()
 	add_item("pick", 				7, 10, 100)
 	add_item("bomb", 				3, 20, 98)
 	add_item("vision", 		1, 50, 96)
-	add_item("antidote", 1, 15, 102)
+	-- add_item("antidote", 1, 15, 102)
 
 	-- grasses
 	add(grasses, add_tile("g1", 4))
