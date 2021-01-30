@@ -2,118 +2,23 @@ pico-8 cartridge // http://www.pico-8.com
 version 29
 __lua__
 
-function _init()
+title = {
+	update = function()
+		if btn(4) or btn(5) then state = game end
+	end,
 
-	music(0)
+	draw = function()
+		cls(13)
 
-	-- transparency color
-	palt(0, false)
-	palt(13, true)
+		sspr(0, 64, 52, 32, 38, 28)
+		sspr(52, 64, 76, 32, 24, 60)
 
-	-- globals
-	entities = {}
-	grasses = {}
-	items = {}
-	keys = {}
-	cursor = { x = 4, y = 3 }
-	selected = 1
-	level = 1
-	workers = 10
-	money = 25
-
-	-- init old keys
-	for i = 0, 5 do
-		keys[i] = false
+		print("z or x to start", 34, 105, 15)
 	end
+}
 
-	dig_tile = add_tile("dig", 46)
-	key_tile = add_tile("key", 36)
-
-	-- entities
-	add_loot("coin", 		5, 1, 32	)
-	add_loot("rock", 		4, 1, 2	)
-	add_loot("gold", 		3, 5, 12)
-	add_loot("gem", 			2, 10, 34)
-	add_loot("chest", 	2, 20, 40)
-	add_loot("skull", 	1, 25, 48)
-	add_trap("snake", 	3, 1, 66)
-	add_trap("spikes", 1, 2, 14)
-	add_trap("spider", 	3, 1, 70)
-	add_trap("boulder", 1, 2, 72)
-	add_trap("skull", 1, 2, 64)
-
-	-- items
-	add_item("pick", 		10, 100)
-	add_item("bomb", 		3, 98)
-	add_item("vision", 1, 96)
-	add_item("antidote", 1, 102)
-
-	-- grasses
-	add(grasses, add_tile("g1", 4))
-	add(grasses, add_tile("g2", 6))
-	add(grasses, add_tile("g3", 8))
-	add(grasses, add_tile("g4", 10))
-
-	-- generate next world based on level
-	next_level()
-end
-
-function add_loot(name, spawn, value, sprite)
-	add_entity("loot", name, spawn, value, sprite)
-end
-
-function add_trap(name, spawn, value, sprite)
-	add_entity("trap", name, spawn, value, sprite)
-end
-
-function add_entity(type, name, spawn, value, sprite)
-	add(entities, { type = type, name = name, spawn = spawn, value = value, sprite = sprite})
-end
-
-function add_tile(name, sprite)
-	return { name = name, sprite = sprite }
-end
-
-function add_item(name, uses, sprite)
-	add(items, { name = name, uses = uses, sprite = sprite })
-end
-
-function next_level()
-	-- globals
-	tiles = {}
-	spawns = {}
-	delay = 0
-
-	-- spawns
-	-- todo: change based on level
-	for k, e in pairs(entities) do
-		for i = 1, e.spawn do
-			add(spawns, e)
-		end
-	end
-
-	-- tiles
-	for x = 1, 8 do
-		add(tiles, {})
-
-		for y = 1, 7 do
-			local tile = {
-				sprites = { grasses[flr(rnd(#grasses)) + 1] },
-			}
-
-			-- spawn loot or trap
-			-- todo: base on level
-			if (rnd(1) < 0.60) then
-				tile.e = spawns[flr(rnd(#spawns)) + 1]
-			end
-
-			add(tiles[x], tile)
-		end
- end
-
-end
-
-function _update()
+game = {
+	update = function()
 		-- movement
 		if (not keys[0] and btn(0)) then cursor.x -= 1 end
 		if (not keys[1] and btn(1)) then cursor.x += 1 end
@@ -160,7 +65,206 @@ function _update()
 		end
 
 		-- debug
-		if (not keys[5] and btn(5)) then debug = not debug end
+		if (not keys[5] and btn(5)) then
+			-- debug = not debug
+			state = shop
+		end
+
+		-- shop
+		if items[1].uses <= 0 then
+			state = shop
+		end
+
+		-- gameover
+		if workers <= 0 then
+			state = gameover
+		end
+
+	end,
+
+	draw = function()
+		cls(13)
+
+		-- tiles
+		for x = 1, 8 do
+			for y = 1, 7 do
+				for k, v in pairs(tiles[x][y].sprites) do
+					draw_sprite(v.sprite, (x - 1) * 16, (y - 1) * 16)
+				end
+			end
+		end
+
+		-- items
+		for k, v in pairs(items) do
+			x = (k - 1) * 16
+			y = 7 * 16
+			draw_sprite(v.sprite, x, y)
+			print(v.uses, x + 1, y + 1)
+		end
+
+		-- ui
+		print("😐 " .. workers, 90, 7*16+2)
+		print("$ " .. money, 90, 7*16+10)
+
+		-- cursor
+		local cx = cursor.x - 1
+		local cy = cursor.y - 1
+		rect(cx * 16, cy * 16, cx * 16 + 15, cy * 16 + 15, 15)
+	end
+}
+
+shop = {
+	update = function()
+		if not keys[5] and btn(5) then
+			state = game
+		end
+	end,
+
+	draw = function()
+		cls(13)
+		print("stock up adventurer", 26, 8, 7)
+		sspr(80, 32, 32, 32, 32, 12, 64, 64)
+		print("x to exit", 45, 115, 7)
+
+		for k, v in pairs(items) do
+			draw_sprite(v.sprite, k * 16, 82)
+			print("$" .. v.value, k * 16 + 2, 100)
+		end
+
+	end
+}
+
+gameover = {
+	update = function()
+		if not keys[4] and btn(4) or not keys[5] and btn(5) then
+			_init()
+			state = game
+		end
+	end,
+
+	draw = function()
+		game.draw()
+
+		rectfill(20, 40, 108, 88, 0)
+		print("game over", 47, 56, 7)
+		print("z or x to restart", 31, 68, 7)
+	end
+}
+
+function _init()
+	-- music(0)
+
+	-- transparency color
+	palt(0, false)
+	palt(13, true)
+
+	-- globals
+	entities = {}
+	grasses = {}
+	items = {}
+	keys = {}
+	cursor = { x = 4, y = 3 }
+	selected = 1
+	level = 1
+	workers = 10
+	money = 25
+
+	-- init old keys
+	for i = 0, 5 do
+		keys[i] = false
+	end
+
+	dig_tile = add_tile("dig", 46)
+	key_tile = add_tile("key", 36)
+
+	-- entities
+	add_loot("coin", 			5, 1, 32)
+	add_loot("rock", 			4, 1, 2)
+	add_loot("gold", 			3, 5, 12)
+	add_loot("gem", 				2, 10, 34)
+	add_loot("chest", 		2, 20, 40)
+	add_loot("skull", 		1, 25, 48)
+	add_trap("snake", 		3, 1, 66)
+	add_trap("spikes", 	1, 2, 14)
+	add_trap("spider", 	3, 1, 70)
+	add_trap("boulder", 1, 2, 72)
+	add_trap("skull", 		1, 2, 64)
+
+	-- items
+	add_item("pick", 				7, 10, 100)
+	add_item("bomb", 				3, 20, 98)
+	add_item("vision", 		1, 50, 96)
+	add_item("antidote", 1, 15, 102)
+
+	-- grasses
+	add(grasses, add_tile("g1", 4))
+	add(grasses, add_tile("g2", 6))
+	add(grasses, add_tile("g3", 8))
+	add(grasses, add_tile("g4", 10))
+
+	-- generate next world based on level
+	next_level()
+
+	state = title
+end
+
+function add_loot(name, spawn, value, sprite)
+	add_entity("loot", name, spawn, value, sprite)
+end
+
+function add_trap(name, spawn, value, sprite)
+	add_entity("trap", name, spawn, value, sprite)
+end
+
+function add_entity(type, name, spawn, value, sprite)
+	add(entities, { type = type, name = name, spawn = spawn, value = value, sprite = sprite})
+end
+
+function add_tile(name, sprite)
+	return { name = name, sprite = sprite }
+end
+
+function add_item(name, uses, value, sprite)
+	add(items, { name = name, uses = uses, value = value, sprite = sprite })
+end
+
+function next_level()
+	-- globals
+	tiles = {}
+	spawns = {}
+	delay = 0
+
+	-- spawns
+	-- todo: change based on level
+	for k, e in pairs(entities) do
+		for i = 1, e.spawn do
+			add(spawns, e)
+		end
+	end
+
+	-- tiles
+	for x = 1, 8 do
+		add(tiles, {})
+
+		for y = 1, 7 do
+			local tile = {
+				sprites = { grasses[flr(rnd(#grasses)) + 1] },
+			}
+
+			-- spawn loot or trap
+			-- todo: base on level
+			if (rnd(1) < 0.60) then
+				tile.e = spawns[flr(rnd(#spawns)) + 1]
+			end
+
+			add(tiles[x], tile)
+		end
+ end
+
+end
+
+function _update()
+		state.update()
 
 		-- update old keys
 		for i = 0, 5 do
@@ -175,35 +279,7 @@ function draw_sprite(sprite, x, y)
 end
 
 function _draw()
-	cls(13)
-
-	-- tiles
- for x = 1, 8 do
-		for y = 1, 7 do
-			local tile = tiles[x][y]
-
-			for k, v in pairs(tile.sprites) do
-				draw_sprite(v.sprite, (x - 1) * 16, (y - 1) * 16)
-			end
-		end
- end
-
-	-- items
-	for k, v in pairs(items) do
-		x = (k - 1) * 16
-		y = 7 * 16
-		draw_sprite(v.sprite, x, y)
-		print(v.uses, x + 1, y + 1)
-	end
-
-	-- ui
-	print("😐 " .. workers, 90, 7*16+2)
-	print("$ " .. money, 90, 7*16+10)
-
-	-- cursor
-	local cx = cursor.x - 1
-	local cy = cursor.y - 1
-	rect(cx * 16, cy * 16, cx * 16 + 15, cy * 16 + 15, 15)
+	state.draw()
 end
 
 __gfx__
@@ -271,38 +347,6 @@ ddddd000000ddddddd0220dddddddddddddc10dddddd6ddddddd1bbbbbbaddddddddddd66ddddddd
 ddddddddddddddddddd00dddddddddddddd00dddddddddddddddd1ccccaddddddddddddd5dddddddddd59955550000555000055555995ddd0000000000000000
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd6dddddddddd59955555555555555555555995ddd0000000000000000
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd0000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 ddddddddddddddddddddddddddddddddddddddddddddddddddddddddbddbdddddddddddddd777dddddddd3dddddddddddddddddddddddddddddddddddddddddd
@@ -329,19 +373,12 @@ dddddd88dd22d88ddd88ddd288882dddd88dd88d88eeeddddddddd675dddbdddd36663dddd565bdd
 dddddd88ddddd88ddd88dddd2882ddddd88dd88d88888ddddddddd665ddbddddddbb6ddddd756bdd6666ddd666dd6656ddd6666ddd666dd56666ddd666376665
 dddddd88ddeed88ddd88ddddd88dddddd88dd88d88222ddddddddd665ddbdddddd66b3dddd676bdd6666ddd666dd6666ddd6676ddd666dd05676ddd666766660
 dddddd88dd88d88ddd88ddddd88dddddd88dd88d88dddddddddddd655ddadddddd56663d6d666add5667777566dd66667776656d6d566ddd5656dd366666665d
-dddddd888888d88ddd88ddddd88dddddd88ee88d88ddddddddd66d555dddddddddb555d0d5555ddd0555555555dd555555555550dd555d6d5555dd355555550d
-dddddd888888d88ddd88ddddd88dddddd888888d88ddddddddd56d000d666dddddb000ddd0000d6dd000000660dd00000000000ddd0006dd0000dd3b000600dd
-dddddd222222d22ddd22ddddd22dddddd222222d22dddddddd500ddddd550ddbbbddddd6ddddd56dddddddd55ddddddd66dddddddddd55ddddddddddbd55dddd
-dddddddddddddddddddddddddddddddddddddddddddddddddd0dddddd00dddaddddddd0ddddd000ddddddd00ddddddd665ddddddddd00ddddddddddddbbbbddd
+dddddd888888d88ddd88ddddd88dddddd88ee88d88dddddddddddd555dddddddddb555d0d5555ddd0555555555dd555555555550dd555d6d5555dd355555550d
+dddddd888888d88ddd88ddddd88dddddd888888d88dddddddddddd000d666dddddb000ddd0000d6dd000000660dd00000000000ddd0006dd0000dd3b000600dd
+dddddd222222d22ddd22ddddd22dddddd222222d22dddddddddddddddd550ddbbbddddd6ddddd56dddddddd55ddddddd66dddddddddd55ddddddddddbd55dddd
+ddddddddddddddddddddddddddddddddddddddddddddddddddddddddd00dddaddddddd0ddddd000ddddddd00ddddddd665ddddddddd00ddddddddddddbbbbddd
 ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd550dddddddddddddddddddddddddddadd
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd000dddddddddddddddddddddd05ddddddd
-__map__
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000101010100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000000101000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000001010101000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000001000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __sfx__
 001400200d0200e5200a7200e520003200e5200032009520115200f5200d5200852008520145200d720003201472019720197200132000320055200a3200b520145201752014720157201e7200a0201402000020
 000a002003100274103341002310061001641003300033000510000700294103141003310007000d410023000910000700033002a410304100331003300144100610001700033002b4102e41002310033000b410
