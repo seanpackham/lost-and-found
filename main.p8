@@ -3,19 +3,49 @@ version 29
 __lua__
 
 world = {}
+items = {}
+tiles = {}
+probs = {}
+
+level = 1
+
+
 c = {x=4, y=3}
 
-local tile = {}
+-- grass
 
-local items = {}
--- the standard tile. it will be the original tile pluss if the dig
---comes up with nothing
+add(tiles, {
+	t="tile",
+	name="grass2",
+	p=1,
+	value=0,
+	s=6
+})
 
--- treasure
+add(tiles, {
+	t="tile",
+	name="grass1",
+	p=1,
+	value=0,
+	s=4
+})
+
+-- special item
+
+key = {
+	t="treasure",
+	name="key",
+	p=1,
+	value=0.5,
+	s=36
+}
+
+-- random spawn items
+
 add(items, {
 	t="tile",
 	name="rock1",
-	p=0.7,
+	p=2,
 	value=0,
 	s=2
 })
@@ -23,23 +53,7 @@ add(items, {
 add(items, {
 	t="tile",
 	name="rock2",
-	p=0.7,
-	value=0,
-	s=2
-})
-
-add(items, {
-	t="tile",
-	name="grass2",
-	p=0.7,
-	value=0,
-	s=2
-})
-
-add(items, {
-	t="tile",
-	name="grass1",
-	p=0.7,
+	p=2,
 	value=0,
 	s=2
 })
@@ -47,99 +61,103 @@ add(items, {
 add(items, {
 	t="treasure",
 	name="gold",
-	p=0.5,
+	p=1,
 	value=1,
-	s=3
-})
-
-add(items, {
-	t="treasure",
-	name="key",
-	p=0.7,
-	value=0.5,
-	s=4
+	s=32
 })
 
 add(items, {
 	t="treasure",
 	name="chest",
-	p=0.2,
+	p=5,
 	value=3,
-	s=5
+	s=38
 })
 
--- trap
 add(items, {
 	t="trap",
 	name="snake",
-	p=0.5,
+	p=1,
 	damage=1,
-	s=6
+	s=66
 })
 
 add(items, {
 	t="trap",
 	name="spikes",
-	p=0.2,
+	p=1,
 	damage=2,
-	s=7
+	s=68
 })
 
 add(items, {
 	t="trap",
 	name="skull",
-	p=0.1,
+	p=1,
 	damage=3,
-	s=8
+	s=64
 })
 
--- equipment
 add(items, {
 	t="equipment",
 	name="pickaxe",
-	p=0.2,
+	p=1,
 	uses=2,
 	area=1,
-	s=9
+	s=100
 })
 
 add(items, {
 	t="equipment",
 	name="vision",
-	p=0.5,
+	p=1,
 	uses=3,
 	area=0,
-	s=10
+	s=96
 })
 
 add(items, {
 	t="equipment",
 	name="dynamite",
-	p=0.1,
+	p=1,
 	uses=1,
 	area=2,
-	s=11
+	s=98
 })
 
 
 function rnd_item()
 	-- print(rnd(#items))
-	return items[flr(rnd(#items))+1]
+	return probs[flr(rnd(#probs))+1]
 end
 
 function _init()
-	music(0)
+	-- music(0)
+
+	-- tile spawn probability
+	for k,tile in pairs(items) do
+		for i=1,tile.p do
+			-- print(tile.name)
+			add(probs, tile)
+		end
+	end
+
+	-- print(#probs)
 	for x=1,8 do
 		add(world, {})
 		for y=1,8 do
 			item=rnd_item()
 			-- print(item.name)
-			add(world[x], {
-				t=item,
-				c=rnd(15)+1}
-			)
+			-- 75% chance to spawn an item
+			if (rnd(1) > 0.75) then
+				add(world[x], { t=item })
+			-- else just grass
+			else
+					add(world[x], { t=tiles[flr(rnd(#tiles))+1] })
+			end
 		end
  end
+
 end
 
 
@@ -172,7 +190,7 @@ function _update()
 	end
 	-- x
 	if (btn(5)) then
-
+		sfx(0)
 	end
 end
 
@@ -180,20 +198,24 @@ end
 function _draw()
 	cls()
  for x=1,8 do
-		for y=1,8 do
+		for y=1,7 do
+			s=world[x][y].t.s
+
 			tx=x-1
 			ty=y-1
-			-- rect(tx*16,ty*16,tx*16+15,ty*16+15,world[x][y].c)
 
-			spr(world[x][y].t.s,tx*16,ty*16)
-			spr(world[x][y].t.s+1,(tx+1)*16,ty*16)
+			sx=(s%32)*8
+			sy=flr(s/32)*16
+
+			sspr(sx,sy,16,16,
+				tx*16,ty*16)
 
 		end
  end
 
 	cx = c.x-1
 	cy = c.y-1
-	rectfill(cx*16,cy*16,cx*16+15,cy*16+15,world[c.x][c.y].c)
+	rect(cx*16,cy*16,cx*16+15,cy*16+15,15)
 end
 
 __gfx__
