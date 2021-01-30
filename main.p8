@@ -2,414 +2,192 @@ pico-8 cartridge // http://www.pico-8.com
 version 29
 __lua__
 
-debug=false
-
-world = nil
-probs = nil
-gameover=false
-shop=false
-delay=0
-
-inventory = {}
-selected=1
-level = 1
-workers = 4
-money = 100
-
-grass = {}
-items = {}
-tiles = {}
-
-up=false
-down=false
-left=false
-right=false
-zz=false
-xx=false
-
-c = {x=4, y=3}
-
--- special item
-
-key = {
-	treasure=true,
-	name="key",
-	p=1,
-	value=1,
-	s=36
-}
-
-dug = {
-	name="dug",
-	p=1,
-	value=1,
-	s=46
-}
-
--- grass
-
-add(grass, {
-	t="tile",
-	name="grass1",
-	p=1,
-	value=0,
-	s=4
-})
-
-add(grass, {
-	t="tile",
-	name="grass2",
-	p=2,
-	value=0,
-	s=6
-})
-
-add(grass, {
-	t="tile",
-	name="grass3",
-	p=1,
-	value=0,
-	s=8
-})
-
-add(grass, {
-	t="tile",
-	name="grass4",
-	p=1,
-	value=0,
-	s=10
-})
-
--- random spawn tiles
-
-add(tiles, {
-	treasure=true,
-	name="rock1",
-	p=1,
-	value=1,
-	s=2
-})
-
-add(tiles, {
-	treasure=true,
-	name="rock2",
-	p=1,
-	value=1,
-	s=2
-})
-
--- treasure
-
-add(tiles, {
-	treasure=true,
-	name="gold",
-	p=3,
-	value=1,
-	s=12
-})
-
-add(tiles, {
-	treasure=true,
-	name="skull",
-	p=1,
-	value=3,
-	s=64
-})
-
-add(tiles, {
-	treasure=true,
-	name="chest",
-	p=1,
-	value=3,
-	s=38
-})
-
--- traps
-
-add(tiles, {
-	trap=true,
-	name="snake",
-	p=1,
-	damage=1,
-	s=66
-})
-
-add(tiles, {
-	trap=true,
-	name="spikes",
-	p=1,
-	damage=2,
-	s=14
-})
-
--- items
-
-add(items, {
-	item=true,
-	name="pickaxe",
-	p=2,
-	uses=7,
-	area=1,
-	s=100
-})
-
-
-add(items, {
-	item=true,
-	name="dynamite",
-	p=1,
-	uses=1,
-	area=2,
-	s=98
-})
-
-add(items, {
-	item=true,
-	name="vision",
-	p=2,
-	uses=3,
-	area=0,
-	s=96
-})
-
-function worldgen()
-	world = {}
-	gameover=false
-	shop=false
-	delay=0
-
-	-- tile spawn probability
-	for k,tile in pairs(tiles) do
-		for i=1,tile.p do
-			-- print(tile.name)
-			add(probs, tile)
-		end
-	end
-
-	-- level spawn
-	for x=1,8 do
-		add(world, {})
-		for y=1,8 do
-			tile = {
-				g=grass[flr(rnd(#grass))+1],
-				t=nil,
-				dug=false
-			}
-
-			-- 75% chance to spawn an item
-			if (rnd(1) < 0.60) then
-				tile.t=probs[flr(rnd(#probs))+1]
-			end
-
-			add(world[x], tile)
-		end
- end
-end
-
 function _init()
 	-- music(0)
 
-	inventory = {}
-	probs = {}
-	selected=1
+	-- transparency color
+	palt(0, false)
+	palt(13, true)
+
+	-- globals
+	entities = {}
+	grasses = {}
+	items = {}
+	keys = {}
+	cursor = { x = 4, y = 3 }
+	selected = 1
 	level = 1
 	workers = 4
 	money = 100
 
-	-- draw black pixels
-	palt(0, false)
-	palt(13, true)
+	-- init old keys
+	for i = 0, 5 do
+		keys[i] = false
+	end
 
-	-- starting inventory
-	-- pick
-	add(inventory, { uses=items[1].uses, t=items[1] })
-	-- dynamite
-	add(inventory, { uses=items[2].uses, t=items[2] })
-	-- vision
-	add(inventory, { uses=items[3].uses, t=items[3] })
+	dig_tile = add_tile("dig", 46)
+	key_tile = add_tile("key", 36)
 
-	worldgen()
+	-- entities
+	add_loot("rock", 		4, 1, 2	)
+	add_loot("gold", 		2, 5, 12)
+	add_loot("gem", 			1, 3, 34)
+	add_loot("chest", 	1, 5, 40)
+	add_loot("skull", 	1, 5, 48)
+	add_trap("snake", 	2, 1, 66)
+	add_trap("spikes", 1, 2, 14)
+
+	-- items
+	add_item("pick", 		7, 100)
+	add_item("bomb", 		3, 98)
+	add_item("vision", 1, 96)
+
+	-- grasses
+	add(grasses, add_tile("g1", 4))
+	add(grasses, add_tile("g2", 6))
+	add(grasses, add_tile("g3", 8))
+	add(grasses, add_tile("g4", 10))
+
+	-- generate next world based on level
+	next_level()
 end
 
+function add_loot(name, spawn, value, sprite)
+	add_entity("loot", name, spawn, value, sprite)
+end
+
+function add_trap(name, spawn, value, sprite)
+	add_entity("trap", name, spawn, value, sprite)
+end
+
+function add_entity(type, name, spawn, value, sprite)
+	add(entities, { type = type, name = name, spawn = spawn, value = value, sprite = sprite})
+end
+
+function add_tile(name, sprite)
+	return { name = name, sprite = sprite }
+end
+
+function add_item(name, uses, sprite)
+	add(items, { name = name, uses = uses, sprite = sprite })
+end
+
+function next_level()
+	-- globals
+	tiles = {}
+	spawns = {}
+	delay = 0
+
+	-- spawns
+	-- todo: change based on level
+	for k, e in pairs(entities) do
+		for i = 1, e.spawn do
+			add(spawns, e)
+		end
+	end
+
+	-- tiles
+	for x = 1, 8 do
+		add(tiles, {})
+
+		for y = 1, 7 do
+			local tile = {
+				sprites = { grasses[flr(rnd(#grasses)) + 1] },
+			}
+
+			-- spawn loot or trap
+			-- todo: base on level
+			if (rnd(1) < 0.60) then
+				tile.e = spawns[flr(rnd(#spawns)) + 1]
+			end
+
+			add(tiles[x], tile)
+		end
+ end
+
+end
 
 function _update()
+		-- movement
+		if (not keys[0] and btn(0)) then cursor.x -= 1 end
+		if (not keys[1] and btn(1)) then cursor.x += 1 end
+		if (not keys[2] and btn(2)) then cursor.y -= 1 end
+		if (not keys[3] and btn(3)) then cursor.y += 1 end
 
-	-- game over
-	if workers <= 0 then
-		gameover=true
-		-- play gameover sound
-	end
+		if cursor.x < 1 then cursor.x = 1 end
+		if cursor.x > 8 then cursor.x = 8 end
+		if cursor.y < 1 then cursor.y = 1 end
+		if cursor.y > 7 then cursor.y = 7 end
 
-	if gameover then
-		if (not xx and btn(5)) then
-			_init()
+		-- dig
+		if (not keys[4] and btn(4)) then
 
-		end
+			local tile = tiles[cursor.x][cursor.y]
 
-		return
-	end
+			if #tile.sprites == 1 then
+				items[1].uses -= 1
+				add(tile.sprites, dig_tile)
 
-	-- shop
+				-- there's loot or a trap
+				if tile.e then
+					add(tile.sprites, tile.e)
 
-	if inventory[1].uses <= 0 then
-		shop=true
-		-- play shop sound
-	end
+					if tile.e.type == "loot" then
+						-- treasure
+						sfx(6)
+						money += tile.e.value
+					else
+						-- trap
+						sfx(4)
+						workers -= tile.e.value
+					end
 
-	if shop then
-			delay+=1
-
-			if delay > 30*2 then
-				-- shop logic
-
-				-- buy
-
-				-- exit
-				if (not xx and btn(5)) then
-					worldgen()
-
-					-- temp
-					inventory[1].uses=9
+				else
+					-- grass
+					sfx(3)
 				end
-			end
 
-			return
-	end
-
-	-- game
-
-	if (not left and btn(0)) then
-		c.x = c.x-1
-	end
-
-	if (not right and btn(1)) then
-		c.x = c.x+1
-	end
-
-	if (not up and btn(2)) then
-		c.y = c.y-1
-	end
-
-	if (not down and btn(3)) then
-		c.y = c.y+1
-	end
-
-	if c.x<1 then c.x=1 end
-	if c.x>8 then c.x=8 end
-	if c.y<1 then c.y=1 end
-	if c.y>8 then c.y=8 end
-
-	if (not zz and btn(4)) then
-
-		if inventory[selected].uses <= 0 then
-			return
-			-- play no more uses sound
-		end
-
-		tile=world[c.x][c.y]
-
-		if tile.dug then
-			-- play already dug sound
-			sfx(7)
-		else
-			world[c.x][c.y].dug=true
-			inventory[selected].uses-= 1
-
-			-- just grass
-			if not tile.t then
-				sfx(3)
 			else
-
-				if tile.t.treasure then
-					-- play treasure sound
-					sfx(6)
-					money += tile.t.value
-				end
-				if tile.t.trap then
-					-- play trap soundz
-					sfx(4)
-					workers -= tile.t.damage
-				end
-
+				-- dig
+				sfx(7)
 			end
 		end
-	end
 
-	if (not xx and btn(5)) then
-		debug=not debug
-	end
+		-- debug
+		if (not keys[5] and btn(5)) then debug = not debug end
 
-	-- old buttons
-	left=btn(0)
-	right=btn(1)
-	up=btn(2)
-	down=btn(3)
-	zz=btn(4)
-	xx=btn(5)
+		-- update old keys
+		for i = 0, 5 do
+			keys[i] = btn(i)
+		end
 end
 
-
-function draw_sprite(s, x, y)
-	sx=(s%32)*8
-	sy=flr(s/32)*16
-	sspr(sx,sy,16,16, x,y)
+function draw_sprite(sprite, x, y)
+	local sx = (sprite % 32) * 8
+	local sy = flr(sprite / 32) * 16
+	sspr(sx, sy, 16, 16, x, y)
 end
 
 function _draw()
 	cls(13)
 
-	if shop and delay > 30*2 then
-		print("do you have treasure to trade?", 4, 8, 7)
-		sspr(0,64,32,32, 32,12,64,64)
-		print("x to leave", 44, 120, 7)
-		return
-	end
+	-- tiles
+ for x = 1, 8 do
+		for y = 1, 7 do
+			local tile = tiles[x][y]
 
-	-- world
- for x=1,8 do
-		for y=1,7 do
-			tx=x-1
-			ty=y-1
-
-			-- grass tile
-			s=world[x][y].g.s
-			sx=(s%32)*8
-			sy=flr(s/32)*16
-			draw_sprite(s, tx*16, ty*16)
-
-			tile=world[x][y]
-
-			if debug or tile.dug then
-				if tile.dug then
-					s=dug.s
-					sx=(s%32)*8
-					sy=flr(s/32)*16
-					draw_sprite(s, tx*16, ty*16)
-				end
-
-				if tile.t then
-					s=tile.t.s
-					sx=(s%32)*8
-					sy=flr(s/32)*16
-					draw_sprite(s, tx*16, ty*16)
-				end
+			for k, v in pairs(tile.sprites) do
+				draw_sprite(v.sprite, (x - 1) * 16, (y - 1) * 16)
 			end
 		end
  end
 
-	-- inventory
-	for i=1,#inventory do
-			x=(i-1)*16
-			y=7*16
-			s=inventory[i].t.s
-			sx=(s%32)*8
-			sy=flr(s/32)*16
-			draw_sprite(s, x, y)
-			print(inventory[i].uses, x+1, y+1)
-
-			-- if selected == i then
-			-- 	rect(x,y,16,16,15)
-			-- end
+	-- items
+	for k, v in pairs(items) do
+		x = (k - 1) * 16
+		y = 7 * 16
+		draw_sprite(v.sprite, x, y)
+		print(v.uses, x + 1, y + 1)
 	end
 
 	-- ui
@@ -417,16 +195,9 @@ function _draw()
 	print("$ " .. money, 90, 7*16+10)
 
 	-- cursor
-	cx = c.x-1
-	cy = c.y-1
-	rect(cx*16,cy*16,cx*16+15,cy*16+15,15)
-
-	if workers <= 0 then
-		rectfill(28, 28, 100, 100, 1)
-		print("game over", 47, 58, 7)
-		print("x to restart", 42, 70, 7)
-
-	end
+	local cx = cursor.x - 1
+	local cy = cursor.y - 1
+	rect(cx * 16, cy * 16, cx * 16 + 15, cy * 16 + 15, 15)
 end
 
 __gfx__
@@ -589,4 +360,3 @@ __music__
 00 0a424344
 00 0b424344
 00 0a0b4344
-
