@@ -10,28 +10,37 @@ local tile = {}
 local items = {}
 -- the standard tile. it will be the original tile pluss if the dig
 --comes up with nothing
-tile["grass1"] = {
-	t="tile",
-	p=0.7,
-	value=0,
-}
 
 -- treasure
-items["coin"] = {
-	t="treasure",
-	-- probability to spawn
-	-- for testing increase probability to spawn
-	p=0.3,
-	value=1,
-	-- sprite
-	s=1
-}
+add(items, {
+	t="tile",
+	name="rock1",
+	p=0.7,
+	value=0,
+	s=2
+})
 
 add(items, {
-	t="treasure",
-	name="gem",
-	p=0.3,
-	value=2,
+	t="tile",
+	name="rock2",
+	p=0.7,
+	value=0,
+	s=2
+})
+
+add(items, {
+	t="tile",
+	name="grass2",
+	p=0.7,
+	value=0,
+	s=2
+})
+
+add(items, {
+	t="tile",
+	name="grass1",
+	p=0.7,
+	value=0,
 	s=2
 })
 
