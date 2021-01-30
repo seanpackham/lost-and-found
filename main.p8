@@ -2,7 +2,7 @@ pico-8 cartridge // http://www.pico-8.com
 version 29
 __lua__
 
-world = {}
+world = nil
 -- grass tiles
 grass = {}
 -- items
@@ -31,6 +31,8 @@ xx=false
 
 c = {x=4, y=3}
 
+shop = false
+shop_delay = 0
 
 -- special item
 
@@ -175,12 +177,8 @@ add(items, {
 	s=96
 })
 
-function _init()
-	-- music(0)
-
-	-- draw black pixels
-	palt(0, false)
-	palt(13, true)
+function worldgen()
+	world={}
 
 	-- tile spawn probability
 	for k,tile in pairs(tiles) do
@@ -208,6 +206,14 @@ function _init()
 			add(world[x], tile)
 		end
  end
+end
+
+function _init()
+	-- music(0)
+
+	-- draw black pixels
+	palt(0, false)
+	palt(13, true)
 
 	-- starting inventory
 	-- pick
@@ -217,10 +223,42 @@ function _init()
 	-- vision
 	add(inventory, { uses=items[3].uses, t=items[3] })
 
+	worldgen()
 end
 
 
 function _update()
+	if workers <= 0 then
+		return
+	end
+
+	if inventory[1].uses <= 0 then
+		shop=true
+		-- play shop sound
+	end
+
+	if shop then
+			shop_delay+=1
+
+			if shop_delay > 30*2 then
+				-- shop logic
+
+				-- buy
+
+				-- exit
+				if (not xx and btn(5)) then
+					worldgen()
+					shop=false
+					shop_delay=0
+
+					-- temp
+					inventory[1].uses=9
+				end
+			end
+
+			return
+	end
+
 	if (not left and btn(0)) then
 		c.x = c.x-1
 	end
@@ -296,7 +334,12 @@ function draw_sprite(s, x, y)
 end
 
 function _draw()
-	cls()
+	cls(13)
+
+	if shop and shop_delay > 30*2 then
+		print("shop", 47, 62, 7)
+		return
+	end
 
 	-- world
  for x=1,8 do
@@ -347,11 +390,15 @@ function _draw()
 	print("😐 " .. workers, 90, 7*16+2)
 	print("$ " .. money, 90, 7*16+10)
 
-
 	-- cursor
 	cx = c.x-1
 	cy = c.y-1
 	rect(cx*16,cy*16,cx*16+15,cy*16+15,15)
+
+	if workers <= 0 then
+		rectfill(28, 28, 100, 100, 1)
+		print("game over", 47, 62, 7)
+	end
 end
 
 __gfx__
@@ -474,4 +521,3 @@ __music__
 00 00414344
 00 01424344
 00 01004344
-
