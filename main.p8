@@ -3,18 +3,43 @@ version 29
 __lua__
 
 world = {}
+-- grass tiles
 grass = {}
-tiles = {}
+-- items
 items = {}
+-- spawn tiles: treasure and trap
+tiles = {}
 
+debug=false
+
+-- spawn probs for tiles
 probs = {}
 
-level = 1
+inventory = {}
+selected=1
 
+level = 1
+workers = 4
+money = 100
+
+up=false
+down=false
+left=false
+right=false
+zz=false
+xx=false
 
 c = {x=4, y=3}
 
 -- grass
+
+add(grass, {
+	t="tile",
+	name="grass1",
+	p=1,
+	value=0,
+	s=4
+})
 
 add(grass, {
 	t="tile",
@@ -26,16 +51,24 @@ add(grass, {
 
 add(grass, {
 	t="tile",
-	name="grass1",
-	p=2,
+	name="grass3",
+	p=1,
 	value=0,
-	s=4
+	s=8
+})
+
+add(grass, {
+	t="tile",
+	name="grass4",
+	p=1,
+	value=0,
+	s=10
 })
 
 -- special item
 
 key = {
-	t="treasure",
+	treasure=true,
 	name="key",
 	p=1,
 	value=1,
@@ -45,25 +78,25 @@ key = {
 -- random spawn tiles
 
 add(tiles, {
-	t="tile",
+	treasure=true,
 	name="rock1",
 	p=1,
-	value=0,
+	value=1,
 	s=2
 })
 
 add(tiles, {
-	t="tile",
+	treasure=true,
 	name="rock2",
 	p=1,
-	value=0,
+	value=1,
 	s=2
 })
 
--- treasuer
+-- treasure
 
 add(tiles, {
-	t="treasure",
+	treasure=true,
 	name="gold",
 	p=3,
 	value=1,
@@ -71,7 +104,7 @@ add(tiles, {
 })
 
 add(tiles, {
-	t="treasure",
+	treasure=true,
 	name="skull",
 	p=1,
 	damage=3,
@@ -79,7 +112,7 @@ add(tiles, {
 })
 
 add(tiles, {
-	t="treasure",
+	treasure=true,
 	name="chest",
 	p=1,
 	value=3,
@@ -89,7 +122,7 @@ add(tiles, {
 -- traps
 
 add(tiles, {
-	t="trap",
+	trap=true,
 	name="snake",
 	p=1,
 	damage=1,
@@ -97,7 +130,7 @@ add(tiles, {
 })
 
 add(tiles, {
-	t="trap",
+	trap=true,
 	name="spikes",
 	p=1,
 	damage=2,
@@ -107,25 +140,17 @@ add(tiles, {
 -- items
 
 add(items, {
-	t="item",
+	item=true,
 	name="pickaxe",
 	p=2,
-	uses=2,
+	uses=7,
 	area=1,
 	s=100
 })
 
-add(items, {
-	t="item",
-	name="vision",
-	p=2,
-	uses=3,
-	area=0,
-	s=96
-})
 
 add(items, {
-	t="item",
+	item=true,
 	name="dynamite",
 	p=1,
 	uses=1,
@@ -133,9 +158,21 @@ add(items, {
 	s=98
 })
 
+add(items, {
+	item=true,
+	name="vision",
+	p=2,
+	uses=3,
+	area=0,
+	s=96
+})
 
 function _init()
 	-- music(0)
+
+	-- draw black pixels
+	palt(0, false)
+	palt(13, true)
 
 	-- tile spawn probability
 	for k,tile in pairs(tiles) do
@@ -145,38 +182,50 @@ function _init()
 		end
 	end
 
-	-- print(#probs)
+	-- level spawn
 	for x=1,8 do
 		add(world, {})
 		for y=1,8 do
+			tile = {
+				g=grass[flr(rnd(#grass))+1],
+				t=nil,
+				dug=false
+			}
+
 			-- 75% chance to spawn an item
 			if (rnd(1) < 0.60) then
-				add(world[x], { t=probs[flr(rnd(#probs))+1] })
-			-- else just grass
-			else
-					add(world[x], { t=grass[flr(rnd(#grass))+1] })
+				tile.t=probs[flr(rnd(#probs))+1]
 			end
+
+			add(world[x], tile)
 		end
  end
+
+	-- starting inventory
+	-- pick
+	add(inventory, { uses=items[1].uses, t=items[1] })
+	-- dynamite
+	add(inventory, { uses=items[2].uses, t=items[2] })
+	-- vision
+	add(inventory, { uses=items[3].uses, t=items[3] })
 
 end
 
 
 function _update()
-	-- left
-	if (btn(0)) then
+	if (not left and btn(0)) then
 		c.x = c.x-1
 	end
-	-- right
-	if (btn(1)) then
+
+	if (not right and btn(1)) then
 		c.x = c.x+1
 	end
-	-- up
-	if (btn(2)) then
+
+	if (not up and btn(2)) then
 		c.y = c.y-1
 	end
-	-- down
-	if (btn(3)) then
+
+	if (not down and btn(3)) then
 		c.y = c.y+1
 	end
 
@@ -185,35 +234,101 @@ function _update()
 	if c.y<1 then c.y=1 end
 	if c.y>8 then c.y=8 end
 
-	-- z
-	if (btn(4)) then
-		sfx(3)
+	if (not zz and btn(4)) then
+
+		if inventory[selected].uses <= 0 then
+			return
+			-- play no more uses sound
+		end
+
+		tile=world[c.x][c.y]
+
+		if tile.dug then
+			-- play already dug sound
+		else
+			sfx(3)
+			inventory[selected].uses-= 1
+			world[c.x][c.y].dug=true
+
+			if tile.treasure then
+				-- play treasure sound
+				money += tile.value
+			end
+			if tile.trap then
+				-- play trap sound
+				workers -= tile.damage
+			end
+		end
+
 	end
-	-- x
-	if (btn(5)) then
-		sfx(0)
+
+	if (not xx and btn(5)) then
+		debug=not debug
 	end
+
+	-- old buttons
+	left=btn(0)
+	right=btn(1)
+	up=btn(2)
+	down=btn(3)
+	zz=btn(4)
+	xx=btn(5)
 end
 
 
+function draw_sprite(s, x, y)
+	sx=(s%32)*8
+	sy=flr(s/32)*16
+	sspr(sx,sy,16,16, x,y)
+end
+
 function _draw()
 	cls()
+
+	-- world
  for x=1,8 do
 		for y=1,7 do
-			s=world[x][y].t.s
-
 			tx=x-1
 			ty=y-1
 
+			-- grass tile
+			s=world[x][y].g.s
 			sx=(s%32)*8
 			sy=flr(s/32)*16
+			draw_sprite(s, tx*16, ty*16)
 
-			sspr(sx,sy,16,16,
-				tx*16,ty*16)
-
+			if debug or world[x][y].dug then
+				if world[x][y].t then
+					s=world[x][y].t.s
+					sx=(s%32)*8
+					sy=flr(s/32)*16
+					draw_sprite(s, tx*16, ty*16)
+				end
+			end
 		end
  end
 
+	-- inventory
+	for i=1,#inventory do
+			x=(i-1)*16
+			y=7*16
+			s=inventory[i].t.s
+			sx=(s%32)*8
+			sy=flr(s/32)*16
+			draw_sprite(s, x, y)
+			print(inventory[i].uses, x+1, y+1)
+
+			-- if selected == i then
+			-- 	rect(x,y,16,16,15)
+			-- end
+	end
+
+	-- ui
+	print("😐 " .. workers, 90, 7*16+2)
+	print("$ " .. money, 90, 7*16+10)
+
+
+	-- cursor
 	cx = c.x-1
 	cy = c.y-1
 	rect(cx*16,cy*16,cx*16+15,cy*16+15,15)
@@ -302,4 +417,3 @@ __music__
 00 00414344
 00 01424344
 00 01004344
-
