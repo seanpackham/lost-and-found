@@ -31,6 +31,24 @@ xx=false
 
 c = {x=4, y=3}
 
+
+-- special item
+
+key = {
+	treasure=true,
+	name="key",
+	p=1,
+	value=1,
+	s=36
+}
+
+dug = {
+	name="dug",
+	p=1,
+	value=1,
+	s=46
+}
+
 -- grass
 
 add(grass, {
@@ -65,16 +83,6 @@ add(grass, {
 	s=10
 })
 
--- special item
-
-key = {
-	treasure=true,
-	name="key",
-	p=1,
-	value=1,
-	s=36
-}
-
 -- random spawn tiles
 
 add(tiles, {
@@ -107,7 +115,7 @@ add(tiles, {
 	treasure=true,
 	name="skull",
 	p=1,
-	damage=3,
+	value=3,
 	s=64
 })
 
@@ -246,20 +254,25 @@ function _update()
 		if tile.dug then
 			-- play already dug sound
 		else
-			sfx(3)
-			inventory[selected].uses-= 1
 			world[c.x][c.y].dug=true
+			inventory[selected].uses-= 1
 
-			if tile.treasure then
-				-- play treasure sound
-				money += tile.value
-			end
-			if tile.trap then
-				-- play trap sound
-				workers -= tile.damage
+			-- just grass
+			if not tile.t then
+				sfx(3)
+			else
+
+				if tile.t.treasure then
+					-- play treasure sound
+					money += tile.t.value
+				end
+				if tile.t.trap then
+					-- play trap soundz
+					workers -= tile.t.damage
+				end
+
 			end
 		end
-
 	end
 
 	if (not xx and btn(5)) then
@@ -297,9 +310,16 @@ function _draw()
 			sy=flr(s/32)*16
 			draw_sprite(s, tx*16, ty*16)
 
-			if debug or world[x][y].dug then
-				if world[x][y].t then
-					s=world[x][y].t.s
+			tile=world[x][y]
+
+			if debug or tile.dug then
+				if tile.t then
+					s=tile.t.s
+					sx=(s%32)*8
+					sy=flr(s/32)*16
+					draw_sprite(s, tx*16, ty*16)
+				elseif tile.dug then
+					s=dug.s
 					sx=(s%32)*8
 					sy=flr(s/32)*16
 					draw_sprite(s, tx*16, ty*16)
