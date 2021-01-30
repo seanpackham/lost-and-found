@@ -45,7 +45,7 @@ key = {
 add(items, {
 	t="tile",
 	name="rock1",
-	p=2,
+	p=3,
 	value=0,
 	s=2
 })
@@ -53,31 +53,43 @@ add(items, {
 add(items, {
 	t="tile",
 	name="rock2",
-	p=2,
+	p=1,
 	value=0,
 	s=2
 })
 
+-- treasuer
+
 add(items, {
 	t="treasure",
 	name="gold",
-	p=1,
+	p=2,
 	value=1,
 	s=32
 })
 
 add(items, {
 	t="treasure",
+	name="skull",
+	p=2,
+	damage=3,
+	s=64
+})
+
+add(items, {
+	t="treasure",
 	name="chest",
-	p=5,
+	p=1,
 	value=3,
 	s=38
 })
 
+-- traps
+
 add(items, {
 	t="trap",
 	name="snake",
-	p=1,
+	p=2,
 	damage=1,
 	s=66
 })
@@ -85,18 +97,12 @@ add(items, {
 add(items, {
 	t="trap",
 	name="spikes",
-	p=1,
+	p=2,
 	damage=2,
 	s=68
 })
 
-add(items, {
-	t="trap",
-	name="skull",
-	p=1,
-	damage=3,
-	s=64
-})
+-- equipment
 
 add(items, {
 	t="equipment",
@@ -126,11 +132,6 @@ add(items, {
 })
 
 
-function rnd_item()
-	-- print(rnd(#items))
-	return probs[flr(rnd(#probs))+1]
-end
-
 function _init()
 	-- music(0)
 
@@ -146,11 +147,9 @@ function _init()
 	for x=1,8 do
 		add(world, {})
 		for y=1,8 do
-			item=rnd_item()
-			-- print(item.name)
 			-- 75% chance to spawn an item
-			if (rnd(1) > 0.75) then
-				add(world[x], { t=item })
+			if (rnd(1) < 0.60) then
+				add(world[x], { t=probs[flr(rnd(#probs))+1] })
 			-- else just grass
 			else
 					add(world[x], { t=tiles[flr(rnd(#tiles))+1] })
