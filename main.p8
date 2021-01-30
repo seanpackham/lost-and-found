@@ -28,16 +28,22 @@ game = {
 		cursor.x = clamp(cursor.x, 1, 8)
 		cursor.y = clamp(cursor.y, 1, 7)
 
-		-- dig
+		-- use
 		if (not keys[4] and btn(4)) then
-
 			local tile = tiles[cursor.x][cursor.y]
 
+			-- not dug
 			if #tile.sprites == 1 then
 
 				if items[item].uses > 0 then
 					items[item].uses -= 1
-					add(tile.sprites, dig_tile)
+
+					if item == 3 then
+						state = vision
+						return
+					else
+						add(tile.sprites, dig_tile)
+					end
 
 					-- there's loot or a trap
 					if tile.e then
@@ -58,10 +64,9 @@ game = {
 						sfx(3)
 					end
 				end
-			else
-				-- dig
-				sfx(7)
+			-- not dug
 			end
+		-- use
 		end
 
 		-- inventory
@@ -79,7 +84,6 @@ game = {
 		if workers <= 0 then
 			state = gameover
 		end
-
 	end,
 
 	draw = function()
@@ -114,6 +118,31 @@ game = {
 		-- ui
 		ui.draw()
 
+	end
+}
+
+vision = {
+	delay = 0,
+
+	update = function()
+		vision.delay += 1
+
+		if vision.delay > 30 - level then
+			vision.delay = 0
+			state = game
+		end
+	end,
+
+	draw = function()
+		game.draw()
+
+		for x = 1, 8 do
+			for y = 1, 7 do
+				if tiles[x][y].e then
+					draw_sprite(tiles[x][y].e.sprite, (x - 1) * 16, (y - 1) * 16)
+				end
+			end
+		end
 	end
 }
 
@@ -158,7 +187,7 @@ shop = {
 
 		-- buy
 		if not keys[4] and btn(4) then
-			if money > items[item].value then
+			if money >= items[item].value then
 				money -= items[item].value
 				items[item].uses += 1
 			end
@@ -214,6 +243,7 @@ function _init()
 	palt(13, true)
 
 	-- globals
+	debug = false
 	entities = {}
 	grasses = {}
 	items = {}
@@ -466,4 +496,3 @@ __music__
 00 0a424344
 00 0b424344
 00 0a0b4344
-
