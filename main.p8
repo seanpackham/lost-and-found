@@ -25,10 +25,8 @@ game = {
 		if (not keys[2] and btn(2)) then cursor.y -= 1 end
 		if (not keys[3] and btn(3)) then cursor.y += 1 end
 
-		if cursor.x < 1 then cursor.x = 1 end
-		if cursor.x > 8 then cursor.x = 8 end
-		if cursor.y < 1 then cursor.y = 1 end
-		if cursor.y > 7 then cursor.y = 7 end
+		cursor.x = clamp(cursor.x, 1, 8)
+		cursor.y = clamp(cursor.y, 1, 7)
 
 		-- dig
 		if (not keys[4] and btn(4)) then
@@ -36,38 +34,39 @@ game = {
 			local tile = tiles[cursor.x][cursor.y]
 
 			if #tile.sprites == 1 then
-				items[1].uses -= 1
-				add(tile.sprites, dig_tile)
 
-				-- there's loot or a trap
-				if tile.e then
-					add(tile.sprites, tile.e)
+				if items[item].uses > 0 then
+					items[item].uses -= 1
+					add(tile.sprites, dig_tile)
 
-					if tile.e.type == "loot" then
-						-- treasure
-						sfx(6)
-						money += tile.e.value
+					-- there's loot or a trap
+					if tile.e then
+						add(tile.sprites, tile.e)
+
+						if tile.e.type == "loot" then
+							-- treasure
+							sfx(6)
+							money += tile.e.value
+						else
+							-- trap
+							sfx(4)
+							workers -= tile.e.value
+						end
+
 					else
-						-- trap
-						sfx(4)
-						workers -= tile.e.value
+						-- grass
+						sfx(3)
 					end
-
-				else
-					-- grass
-					sfx(3)
 				end
-
 			else
 				-- dig
 				sfx(7)
 			end
 		end
 
-		-- debug
+		-- inventory
 		if (not keys[5] and btn(5)) then
-			-- debug = not debug
-			state = shop
+			state = inventory
 		end
 
 		-- shop
@@ -99,8 +98,12 @@ game = {
 			x = (k - 1) * 16
 			y = 7 * 16
 			draw_sprite(v.sprite, x, y)
-			print(v.uses, x + 1, y + 1)
+			print(v.uses, x + 2, y + 2, 15)
 		end
+
+		local ix = item - 1
+		local iy = 7 * 16
+		rect(ix * 16, iy, ix * 16 + 15, iy + 15, 15)
 
 		-- ui
 		print("😐 " .. workers, 90, 7*16+2)
@@ -112,6 +115,30 @@ game = {
 		rect(cx * 16, cy * 16, cx * 16 + 15, cy * 16 + 15, 15)
 	end
 }
+
+inventory = {
+	update = function()
+		if (not keys[0] and btn(0)) then item -= 1 end
+		if (not keys[1] and btn(1)) then item += 1 end
+		if (not keys[2] and btn(2)) then item -= 1 end
+		if (not keys[3] and btn(3)) then item += 1 end
+
+		item = clamp(item, 1, #items)
+
+		if not keys[4] and btn(4) or not keys[5] and btn(5) then
+			state = game
+		end
+	end,
+
+	draw = function()
+		game.draw()
+
+		local ix = item - 1
+		local iy = 7 * 16
+		rect(ix * 16, iy, ix * 16 + 15, iy + 15, 14)
+	end
+}
+
 
 shop = {
 	update = function()
@@ -127,8 +154,8 @@ shop = {
 		print("x to exit", 45, 115, 7)
 
 		for k, v in pairs(items) do
-			draw_sprite(v.sprite, k * 16, 82)
-			print("$" .. v.value, k * 16 + 2, 100)
+			draw_sprite(v.sprite, (k + 1) * 16, 82)
+			print("$" .. v.value, (k + 1) * 16 + 2, 100)
 		end
 
 	end
@@ -164,7 +191,7 @@ function _init()
 	items = {}
 	keys = {}
 	cursor = { x = 4, y = 3 }
-	selected = 1
+	item = 2
 	level = 1
 	workers = 10
 	money = 25
@@ -206,26 +233,6 @@ function _init()
 	next_level()
 
 	state = title
-end
-
-function add_loot(name, spawn, value, sprite)
-	add_entity("loot", name, spawn, value, sprite)
-end
-
-function add_trap(name, spawn, value, sprite)
-	add_entity("trap", name, spawn, value, sprite)
-end
-
-function add_entity(type, name, spawn, value, sprite)
-	add(entities, { type = type, name = name, spawn = spawn, value = value, sprite = sprite})
-end
-
-function add_tile(name, sprite)
-	return { name = name, sprite = sprite }
-end
-
-function add_item(name, uses, value, sprite)
-	add(items, { name = name, uses = uses, value = value, sprite = sprite })
 end
 
 function next_level()
@@ -272,14 +279,40 @@ function _update()
 		end
 end
 
+function _draw()
+	state.draw()
+end
+
 function draw_sprite(sprite, x, y)
 	local sx = (sprite % 32) * 8
 	local sy = flr(sprite / 32) * 16
 	sspr(sx, sy, 16, 16, x, y)
 end
 
-function _draw()
-	state.draw()
+function add_loot(name, spawn, value, sprite)
+	add_entity("loot", name, spawn, value, sprite)
+end
+
+function add_trap(name, spawn, value, sprite)
+	add_entity("trap", name, spawn, value, sprite)
+end
+
+function add_entity(type, name, spawn, value, sprite)
+	add(entities, { type = type, name = name, spawn = spawn, value = value, sprite = sprite})
+end
+
+function add_tile(name, sprite)
+	return { name = name, sprite = sprite }
+end
+
+function add_item(name, uses, value, sprite)
+	add(items, { name = name, uses = uses, value = value, sprite = sprite })
+end
+
+function clamp(value, min, max)
+	if value < min then value = 1 end
+	if value > max then value = max end
+	return value
 end
 
 __gfx__
