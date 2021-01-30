@@ -100,7 +100,7 @@ add(tiles, {
 	name="gold",
 	p=3,
 	value=1,
-	s=32
+	s=12
 })
 
 add(tiles, {
@@ -134,7 +134,7 @@ add(tiles, {
 	name="spikes",
 	p=1,
 	damage=2,
-	s=68
+	s=14
 })
 
 -- items
