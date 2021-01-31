@@ -137,7 +137,7 @@ game = {
 		end
 
 		-- shop
-		if items[1].uses <= 0 then
+		if items[1].uses <= 0 and items[2].uses <= 0 then
 			state = shop
 		end
 
@@ -251,8 +251,12 @@ shop = {
 		end
 
 		-- back to game
-		if btnp(5) then
-			state = game
+		if items[1].uses > 0 or items[2].uses > 0 then
+			if btnp(5) then
+				level += 1
+				next_level()
+				state = game
+			end
 		end
 	end,
 
@@ -260,7 +264,10 @@ shop = {
 		cls(13)
 		print("stock up adventurer", 26, 8, 7)
 		sspr(80, 32, 32, 32, 32, 12, 64, 64)
-		print("x to exit", 45, 120, 7)
+
+		if items[1].uses > 0 or items[2].uses > 0 then
+			print("x to exit", 45, 120, 7)
+		end
 
 		for k, v in pairs(items) do
 			local y = 82
