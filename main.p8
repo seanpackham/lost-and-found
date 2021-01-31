@@ -3,17 +3,27 @@ version 29
 __lua__
 
 title = {
+	y = -30,
+	bob = 0,
+
 	update = function()
 		if btn(4) or btn(5) then state = game end
+
+		title.y = clamp(title.y + 1, -30, 28)
+
+		title.bob += 0.01
 	end,
 
 	draw = function()
 		cls(13)
 
-		sspr(0, 64, 52, 32, 38, 28)
-		sspr(52, 64, 76, 32, 24, 60)
+		sspr(0, 64, 52, 32, 38, title.y)
+		sspr(52, 64, 76, 32, 24, title.y + 30)
 
-		print("z or x to start", 34, 105, 15)
+		if title.y == 28 then
+			print("z or x to start", 34, 105 + sin(title.bob) * 2, 15)
+		end
+
 	end
 }
 
