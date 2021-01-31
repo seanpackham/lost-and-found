@@ -39,6 +39,7 @@ function use_pick(i)
 			else
 				-- play trigger trap sound
 				sfx(4)
+				shake += 0.07
 				workers -= tile.e.value
 			end
 		else
@@ -60,6 +61,7 @@ function use_dynamite(i)
 	-- play dynamite sound
 		sfx(9)
 	items[i].uses -= 1
+	shake += 0.25
 
  for x = cursor.x - 1 , cursor.x + 1 do
 		for y = cursor.y - 1, cursor.y + 1 do
@@ -310,6 +312,7 @@ function _init()
 
 	-- globals
 	debug = false
+	shake = 0
 	entities = {}
 	grasses = {}
 	items = {}
@@ -392,7 +395,25 @@ function _update()
 		state.update()
 end
 
+function screen_shake()
+  local fade = 0.95
+  local x = 16 - rnd(32)
+  local y = 16 - rnd(32)
+
+  x *= shake
+  y *= shake
+
+  camera(x, y)
+  shake *= fade
+
+  if shake < 0.05 then
+    shake = 0
+  end
+end
+
 function _draw()
+	screen_shake()
+
 	-- debug
 	if debug and state == game then
 		vision.draw()
