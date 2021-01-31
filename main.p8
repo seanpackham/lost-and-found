@@ -22,7 +22,8 @@ title = {
 		sspr(52, 64, 76, 32, 24, title.y + 30)
 
 		if title.y == 28 then
-			print("find the skull on lvl 5", 17, 100, 15)
+			print("game by jon, sean & kyle", 15, 15, 15)
+			print("find the skull on lvl 5", 17, 100, 9)
 			print("z or x to start", 34, 115 + sin(title.bob) * 2, 15)
 		end
 	end
@@ -280,9 +281,11 @@ ui = {
 }
 
 function buy_item(i)
-	sfx(13)
-	money -= items[i].value
-	items[i].uses += 1
+	if money >= items[item].value then
+		sfx(13)
+		money -= items[i].value
+		items[i].uses += 1
+	end
 end
 
 shop = {
@@ -294,9 +297,7 @@ shop = {
 
 		-- buy
 		if btnp(4) then
-			if money >= items[item].value then
 				buy_item(item)
-			end
 		end
 
 		-- hotkeys
