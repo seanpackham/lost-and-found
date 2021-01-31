@@ -42,7 +42,11 @@ function use_pick(i)
 		if tile.e then
 			add(tile.sprites, tile.e)
 
-			if tile.e.type == "loot" then
+			if tile.e.name == "skull" then
+				-- play win sound
+				money += tile.e.value
+				state = win
+			elseif tile.e.type == "loot" then
 				-- play find treasure sound
 				sfx(6)
 				money += tile.e.value
@@ -81,7 +85,11 @@ function use_dynamite(i)
 				add(tile.sprites, dig_tile)
 
 				if tile.e then
-					if tile.e.type == "loot" then
+					if tile.e.name == "skull" then
+						-- play win sound
+						money += tile.e.value
+						state = win
+					elseif tile.e.type == "loot" then
 						sfx(6)
 						money += tile.e.value
 						add(tile.sprites, tile.e)
@@ -159,15 +167,20 @@ game = {
 			-- state = shop
 		end
 
-		-- shop
-		if items[1].uses <= 0 and items[2].uses <= 0 then
-			state = shop
-		end
-
 		-- gameover
 		if workers <= 0 then
 			state = gameover
 			-- sfx(1)
+		end
+
+		-- win hack to prevent shop triggering
+		if state == win then
+			return
+		end
+
+		-- shop
+		if items[1].uses <= 0 and items[2].uses <= 0 then
+			state = shop
 		end
 	end,
 
@@ -329,6 +342,24 @@ gameover = {
 	end
 }
 
+win = {
+	update = function()
+		if btnp(4) or btnp(5) then
+			_init()
+			sfx(-1)
+			state = game
+		end
+	end,
+
+	draw = function()
+		game.draw()
+
+		rectfill(20, 40, 108, 88, 9)
+		print("skull found!", 40, 56, 7)
+		print("z or x to restart", 31, 68, 7)
+	end
+}
+
 function _init()
 	sfx(-1)
 	sfx(1)
@@ -338,7 +369,7 @@ function _init()
 	palt(13, true)
 
 	-- globals
-	debug = false
+	debug = true
 	shake = 0
 	entities = {}
 	grasses = {}
@@ -356,9 +387,12 @@ function _init()
 	add_loot("coin", 			4, 10, 32)
 	add_loot("gold", 			3, 20, 12)
 	add_loot("gem", 				2, 25, 34)
-	add_loot("chest", 		1, 30, 40)
+	add_loot("chest", 		1, 30, 38)
 	-- add_loot("rock", 			4, 5, 2)
-	-- add_loot("skull", 		1, 30, 48)
+
+	add_loot("skull", 		1, 100, 40)
+	skull_entity = entities[#entities]
+	del(entities, skull_entity)
 
 	add_trap("snake", 		3, 1, 66)
 	add_trap("spikes", 	1, 1, 14)
@@ -416,6 +450,11 @@ function next_level()
 			add(tiles[x], tile)
 		end
  end
+
+	-- if level 5
+	if level == 5 then
+		tiles[flr(rnd(8)) + 1][flr(rnd(7)) + 1].e = skull_entity
+	end
 
 end
 
