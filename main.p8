@@ -76,24 +76,28 @@ function use_dynamite(i)
  for x = cursor.x - 1 , cursor.x + 1 do
 		for y = cursor.y - 1, cursor.y + 1 do
 			local tile = tiles[clamp(x, 1, 8)][clamp(y, 1, 7)]
-			add(tile.sprites, dig_tile)
 
-			if tile.e then
+			if #tile.sprites == 1 then
+				add(tile.sprites, dig_tile)
 
-				if tile.e.type == "loot" then
-					sfx(6)
-					money += tile.e.value
-					add(tile.sprites, tile.e)
-				else
-					-- dyanmite kill critters
-					if tile.e.name == "snake" or tile.e.name == "spider" then
-							tile.e = nil
-					-- still take environment damage
-					else
-						workers -= tile.e.value
+				if tile.e then
+					if tile.e.type == "loot" then
+						sfx(6)
+						money += tile.e.value
 						add(tile.sprites, tile.e)
+					else
+						-- dyanmite kill critters
+						if tile.e.name == "snake" or tile.e.name == "spider" then
+								tile.e = nil
+						-- still take environment damage
+						else
+							workers -= tile.e.value
+							add(tile.sprites, tile.e)
+						end
 					end
+				-- if entity
 				end
+			-- if not mined
 			end
 
 	 end
@@ -292,7 +296,7 @@ shop = {
 		sspr(80, 32, 32, 32, 32, 12, 64, 64)
 
 		if items[1].uses > 0 or items[2].uses > 0 then
-			print("x to exit", 45, 120, 7)
+			print("x to exit", 20, 120, 7)
 		end
 
 		for k, v in pairs(items) do
