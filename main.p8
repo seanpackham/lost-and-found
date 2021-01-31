@@ -4,14 +4,14 @@ __lua__
 sfx(-1)
 sfx(1)
 title = {
-	y = -60,
+	y = -30,
 	bob = 0,
 	update = function()
 		if btn(4) or btn(5) then state = game
 				sfx(-1)
 		end
 
-		title.y = clamp(title.y + 1, -60, 20)
+		title.y = clamp(title.y + 1, -30, 28)
 
 		title.bob += 0.01
 	end,
@@ -22,10 +22,8 @@ title = {
 		sspr(0, 64, 52, 32, 38, title.y)
 		sspr(52, 64, 76, 32, 24, title.y + 30)
 
-		if title.y == 20 then
-			print("z or x to start", 34, 95 + sin(title.bob) * 2, 15)
-
-			print("created by: jon, sean, kyle", 10, 118, 7)
+		if title.y == 28 then
+			print("z or x to start", 34, 105 + sin(title.bob) * 2, 15)
 		end
 
 	end
@@ -80,9 +78,7 @@ function use_dynamite(i)
  for x = cursor.x - 1 , cursor.x + 1 do
 		for y = cursor.y - 1, cursor.y + 1 do
 			local tile = tiles[clamp(x, 1, 8)][clamp(y, 1, 7)]
-
-			-- if hasn't been mined and an entity
-			if #tile.sprites == 1 and tile.e then
+			if tile.e then
 				add(tile.sprites, dig_tile)
 
 				if tile.e.type == "loot" then
@@ -157,8 +153,9 @@ game = {
 
 		-- shop
 		if items[1].uses <= 0 and items[2].uses <= 0 then
+			sfx(1)
 			state = shop
-		music(8)
+
 		end
 
 		-- gameover
@@ -274,6 +271,9 @@ shop = {
 
 		-- back to game
 		if items[1].uses > 0 or items[2].uses > 0 then
+			music(-1)
+			sfx(-1)
+			music(0)
 			if btnp(5) then
 				level += 1
 				next_level()
