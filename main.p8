@@ -17,6 +17,45 @@ title = {
 	end
 }
 
+function use_pick()
+	local tile = tiles[cursor.x][cursor.y]
+
+	if #tile.sprites == 1 then
+		items[item].uses -= 1
+
+		if tile.e then
+			add(tile.sprites, tile.e)
+
+			if tile.e.type == "loot" then
+				-- play find treasure sound
+				sfx(6)
+				money += tile.e.value
+			else
+				-- play trigger trap sound
+				sfx(4)
+				workers -= tile.e.value
+			end
+		else
+			-- play pick grass sound
+			sfx(3)
+			add(tile.sprites, dig_tile)
+		end
+	else
+		-- play already dug sound
+	end
+end
+
+function use_dynamite()
+	-- play dynamite sound
+end
+
+function use_vision()
+	-- play vision sound
+	items[item].uses -= 1
+	state = vision
+	return
+end
+
 game = {
 	update = function()
 		-- movement
@@ -30,43 +69,18 @@ game = {
 
 		-- use
 		if (not keys[4] and btn(4)) then
-			local tile = tiles[cursor.x][cursor.y]
-
-			-- not dug
-			if #tile.sprites == 1 then
-
-				if items[item].uses > 0 then
-					items[item].uses -= 1
-
-					if item == 3 then
-						state = vision
-						return
-					else
-						add(tile.sprites, dig_tile)
-					end
-
-					-- there's loot or a trap
-					if tile.e then
-						add(tile.sprites, tile.e)
-
-						if tile.e.type == "loot" then
-							-- treasure
-							sfx(6)
-							money += tile.e.value
-						else
-							-- trap
-							sfx(4)
-							workers -= tile.e.value
-						end
-
-					else
-						-- grass
-						sfx(3)
-					end
+			-- current item has uses left
+			if items[item].uses > 0 then
+				if item == 1 then
+					use_pick()
+				elseif item == 2 then
+					use_dynamite()
+				elseif item == 3 then
+					use_vision()
 				end
-			-- not dug
+			else
+				-- play no more uses sound
 			end
-		-- use
 		end
 
 		-- inventory
@@ -248,6 +262,7 @@ function _init()
 	grasses = {}
 	items = {}
 	keys = {}
+	hotkeys = {}
 	cursor = { x = 4, y = 3 }
 	item = 1
 	level = 1
@@ -334,6 +349,10 @@ function _update()
 		-- update old keys
 		for i = 0, 5 do
 			keys[i] = btn(i)
+		end
+
+		for i = 0, 5 do
+			hotkeys[i] = btn(i, 2)
 		end
 end
 
