@@ -1,5 +1,7 @@
 # The Lost City of Phound
 
+![](main.p8.png)
+
 ## Play
 
 [https://www.lexaloffle.com/bbs/?tid=41344](https://www.lexaloffle.com/bbs/?tid=41344)
