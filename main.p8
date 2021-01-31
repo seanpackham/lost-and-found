@@ -78,7 +78,9 @@ function use_dynamite(i)
  for x = cursor.x - 1 , cursor.x + 1 do
 		for y = cursor.y - 1, cursor.y + 1 do
 			local tile = tiles[clamp(x, 1, 8)][clamp(y, 1, 7)]
-			if tile.e then
+
+			-- if hasn't been mined and an entity
+			if #tile.sprites == 1 and tile.e then
 				add(tile.sprites, dig_tile)
 
 				if tile.e.type == "loot" then
