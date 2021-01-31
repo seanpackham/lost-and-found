@@ -27,6 +27,7 @@ function use_pick(i)
 
 	if #tile.sprites == 1 then
 		items[i].uses -= 1
+		add(tile.sprites, dig_tile)
 
 		if tile.e then
 			add(tile.sprites, tile.e)
@@ -43,7 +44,6 @@ function use_pick(i)
 		else
 			-- play pick grass sound
 			sfx(3)
-			add(tile.sprites, dig_tile)
 		end
 	else
 		-- play already dug sound
@@ -57,6 +57,31 @@ function use_dynamite(i)
 	end
 
 	-- play dynamite sound
+	items[i].uses -= 1
+
+ for x = cursor.x - 1 , cursor.x + 1 do
+		for y = cursor.y - 1, cursor.y + 1 do
+			local tile = tiles[clamp(x, 1, 8)][clamp(y, 1, 7)]
+			if tile.e then
+				add(tile.sprites, dig_tile)
+
+				if tile.e.type == "loot" then
+					sfx(6)
+					money += tile.e.value
+					add(tile.sprites, tile.e)
+				else
+					-- dyanmite doesn't trigger traps
+					tile.e = nil
+				-- todo fade trap away
+				end
+			else
+				-- play pick grass sound
+				sfx(3)
+			end
+
+	 end
+ end
+
 end
 
 function use_vision(i)
@@ -163,7 +188,7 @@ vision = {
 	update = function()
 		vision.delay += 1
 
-		if vision.delay > 30 - level then
+		if vision.delay > 45 - (level * 3) then
 			vision.delay = 0
 			state = game
 		end
@@ -235,7 +260,7 @@ shop = {
 		cls(13)
 		print("stock up adventurer", 26, 8, 7)
 		sspr(80, 32, 32, 32, 32, 12, 64, 64)
-		print("x to exit", 45, 115, 7)
+		print("x to exit", 45, 120, 7)
 
 		for k, v in pairs(items) do
 			local y = 82
@@ -359,7 +384,12 @@ function _update()
 end
 
 function _draw()
-	state.draw()
+	-- debug
+	if debug and state == game then
+		vision.draw()
+	else
+			state.draw()
+	end
 end
 
 function draw_sprite(sprite, x, y)
