@@ -53,10 +53,12 @@ end
 function use_dynamite(i)
 	if items[i].uses == 0 then
 		-- play no more uses sound
+			sfx(7)
 		return
 	end
 
 	-- play dynamite sound
+		sfx(9)
 	items[i].uses -= 1
 
  for x = cursor.x - 1 , cursor.x + 1 do
@@ -74,9 +76,6 @@ function use_dynamite(i)
 					tile.e = nil
 				-- todo fade trap away
 				end
-			else
-				-- play pick grass sound
-				sfx(3)
 			end
 
 	 end
@@ -87,10 +86,12 @@ end
 function use_vision(i)
 	if items[i].uses == 0 then
 		-- play no more uses sound
+			sfx(7)
 		return
 	end
 
 	-- play vision sound
+		sfx(8)
 	items[i].uses -= 1
 	state = vision
 	return
@@ -245,6 +246,7 @@ shop = {
 		-- buy
 		if btnp(4) then
 			if money >= items[item].value then
+					sfx(13)
 				money -= items[item].value
 				items[item].uses += 1
 			end
