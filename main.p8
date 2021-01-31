@@ -22,7 +22,8 @@ title = {
 		sspr(52, 64, 76, 32, 24, title.y + 30)
 
 		if title.y == 28 then
-			print("z or x to start", 34, 105 + sin(title.bob) * 2, 15)
+			print("find the skull on lvl 5", 17, 100, 15)
+			print("z or x to start", 34, 115 + sin(title.bob) * 2, 15)
 		end
 	end
 }
@@ -369,7 +370,7 @@ function _init()
 	palt(13, true)
 
 	-- globals
-	debug = true
+	debug = false
 	shake = 0
 	entities = {}
 	grasses = {}
