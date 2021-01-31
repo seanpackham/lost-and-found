@@ -354,8 +354,8 @@ function _init()
 
 	-- entities
 	add_loot("coin", 			4, 10, 32)
-	add_loot("gold", 			3, 15, 12)
-	add_loot("gem", 				2, 20, 34)
+	add_loot("gold", 			3, 20, 12)
+	add_loot("gem", 				2, 25, 34)
 	add_loot("chest", 		1, 30, 40)
 	-- add_loot("rock", 			4, 5, 2)
 	-- add_loot("skull", 		1, 30, 48)
