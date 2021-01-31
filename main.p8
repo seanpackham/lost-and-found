@@ -33,6 +33,7 @@ function use_pick(i)
 		return
 	end
 
+<<<<<<< Updated upstream
 	local tile = tiles[cursor.x][cursor.y]
 
 	if #tile.sprites == 1 then
@@ -60,6 +61,22 @@ function use_pick(i)
 		-- play already dug sound
 	end
 end
+=======
+		-- dig
+		if (not keys[4] and btn(4)) then
+
+			local tile = tiles[cursor.x][cursor.y]
+
+			if #tile.sprites == 1 then
+
+				if items[item].uses > 0 then
+					items[item].uses -= 1
+					add(tile.sprites, dig_tile)
+
+					-- there's loot or a trap
+					if tile.e then
+						add(tile.sprites, tile.e)
+>>>>>>> Stashed changes
 
 function use_dynamite(i)
 	if items[i].uses == 0 then
@@ -92,6 +109,7 @@ function use_dynamite(i)
 						workers -= tile.e.value
 					end
 				end
+<<<<<<< Updated upstream
 			end
 
 	 end
@@ -145,6 +163,12 @@ game = {
 		elseif btnp(1, 1) then
 			-- f
 			use_vision(3)
+=======
+			else
+				-- dig
+				sfx(7)
+			end
+>>>>>>> Stashed changes
 		end
 
 		-- inventory
@@ -163,6 +187,7 @@ game = {
 			state = gameover
 			sfx(1)
 		end
+
 	end,
 
 	draw = function()
@@ -200,6 +225,7 @@ game = {
 	end
 }
 
+<<<<<<< Updated upstream
 vision = {
 	delay = 0,
 
@@ -225,6 +251,8 @@ vision = {
 	end
 }
 
+=======
+>>>>>>> Stashed changes
 inventory = {
 	update = function()
 		if btnp(0) or btnp(2) then item -= 1 end
@@ -261,9 +289,14 @@ shop = {
 		item = clamp(item, 1, #items)
 
 		-- buy
+<<<<<<< Updated upstream
 		if btnp(4) then
 			if money >= items[item].value then
 				sfx(13)
+=======
+		if not keys[4] and btn(4) then
+			if money > items[item].value then
+>>>>>>> Stashed changes
 				money -= items[item].value
 				items[item].uses += 1
 			end
@@ -324,8 +357,11 @@ function _init()
 	palt(13, true)
 
 	-- globals
+<<<<<<< Updated upstream
 	debug = true
 	shake = 0
+=======
+>>>>>>> Stashed changes
 	entities = {}
 	grasses = {}
 	items = {}
@@ -593,3 +629,4 @@ __music__
 00 0a424344
 00 0b424344
 00 0a0b4344
+
