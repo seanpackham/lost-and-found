@@ -350,15 +350,15 @@ function _init()
 	add_trap("snake", 		3, 1, 66)
 	add_trap("spikes", 	1, 1, 14)
 	add_trap("spider", 	2, 1, 70)
-	add_trap("boulder", 2, 1, 72)
+	add_trap("boulder", 2, 2, 72)
 	add_trap("skull", 		1, 2, 64)
 
 	add_loot("chest", 		1, 25, 40)
 
 	-- items
-	add_item("pick", 				10, 10, 100)
-	add_item("bomb", 				3, 20, 98)
-	add_item("vision", 		1, 50, 96)
+	add_item("pick", 				7, 15, 100)
+	add_item("bomb", 				2, 30, 98)
+	add_item("vision", 		2, 20, 96)
 	-- add_item("antidote", 1, 15, 102)
 
 	-- grasses
