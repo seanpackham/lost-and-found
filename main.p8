@@ -279,6 +279,12 @@ ui = {
 	end
 }
 
+function buy_item(i)
+	sfx(13)
+	money -= items[i].value
+	items[i].uses += 1
+end
+
 shop = {
 	update = function()
 		if btnp(0) or btnp(2) then item -= 1 end
@@ -289,10 +295,20 @@ shop = {
 		-- buy
 		if btnp(4) then
 			if money >= items[item].value then
-				sfx(13)
-				money -= items[item].value
-				items[item].uses += 1
+				buy_item(item)
 			end
+		end
+
+		-- hotkeys
+		if btnp(0, 1) then
+			-- s
+			buy_item(1)
+		elseif btnp(3, 1) then
+			-- d
+			buy_item(2)
+		elseif btnp(1, 1) then
+			-- f
+			buy_item(3)
 		end
 
 		-- back to game
