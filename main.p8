@@ -316,6 +316,7 @@ gameover = {
 	update = function()
 		if btnp(4) or btnp(5) then
 			_init()
+			sfx(-1)
 			state = game
 		end
 	end,
@@ -330,6 +331,9 @@ gameover = {
 }
 
 function _init()
+	sfx(-1)
+	sfx(1)
+
 	-- transparency color
 	palt(0, false)
 	palt(13, true)
