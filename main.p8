@@ -69,15 +69,16 @@ function use_dynamite(i)
 	end
 
 	-- play dynamite sound
-		sfx(9)
+	sfx(9)
 	items[i].uses -= 1
 	shake += 0.25
 
  for x = cursor.x - 1 , cursor.x + 1 do
 		for y = cursor.y - 1, cursor.y + 1 do
 			local tile = tiles[clamp(x, 1, 8)][clamp(y, 1, 7)]
+			add(tile.sprites, dig_tile)
+
 			if tile.e then
-				add(tile.sprites, dig_tile)
 
 				if tile.e.type == "loot" then
 					sfx(6)
@@ -90,6 +91,7 @@ function use_dynamite(i)
 					-- still take environment damage
 					else
 						workers -= tile.e.value
+						add(tile.sprites, tile.e)
 					end
 				end
 			end
@@ -161,7 +163,7 @@ game = {
 		-- gameover
 		if workers <= 0 then
 			state = gameover
-			sfx(1)
+			-- sfx(1)
 		end
 	end,
 
@@ -251,8 +253,10 @@ inventory = {
 
 ui = {
 	draw = function()
-		print("😐 " .. workers, 100, 7 * 16 + 2, 7)
-		print("$ " .. money, 100, 7 * 16 + 10, 7)
+		print("lvl " .. level, 80, 7 * 16 + 2, 7)
+
+		print("😐 " .. workers, 104, 7 * 16 + 2, 7)
+		print("$ " .. money, 80, 7 * 16 + 10, 7)
 	end
 }
 
@@ -322,6 +326,9 @@ gameover = {
 }
 
 function _init()
+	sfx(-1)
+	sfx(1)
+
 	-- transparency color
 	palt(0, false)
 	palt(13, true)
@@ -374,9 +381,6 @@ function _init()
 end
 
 function next_level()
-	sfx(-1)
-	sfx(1)
-
 	-- globals
 	tiles = {}
 	spawns = {}
