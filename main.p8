@@ -215,11 +215,14 @@ vision = {
 	draw = function()
 		game.draw()
 
-		for x = 1, 8 do
-			for y = 1, 7 do
-				if tiles[x][y].e then
-					draw_sprite(tiles[x][y].e.sprite, (x - 1) * 16, (y - 1) * 16)
+		for x = cursor.x - 1 , cursor.x + 1 do
+			for y = cursor.y - 1, cursor.y + 1 do
+				local tile = tiles[clamp(x, 1, 8)][clamp(y, 1, 7)]
+
+				if tile.e then
+					draw_sprite(tile.e.sprite, (x - 1) * 16, (y - 1) * 16)
 				end
+
 			end
 		end
 	end
@@ -324,7 +327,7 @@ function _init()
 	palt(13, true)
 
 	-- globals
-	debug = true
+	debug = false
 	shake = 0
 	entities = {}
 	grasses = {}
@@ -343,13 +346,14 @@ function _init()
 	add_loot("rock", 			4, 5, 2)
 	add_loot("gold", 			3, 15, 12)
 	add_loot("gem", 				2, 20, 34)
-	add_loot("chest", 		2, 25, 40)
 	add_loot("skull", 		1, 25, 48)
 	add_trap("snake", 		3, 1, 66)
 	add_trap("spikes", 	1, 1, 14)
 	add_trap("spider", 	2, 1, 70)
 	add_trap("boulder", 2, 1, 72)
 	add_trap("skull", 		1, 2, 64)
+
+	add_loot("chest", 		1, 25, 40)
 
 	-- items
 	add_item("pick", 				10, 10, 100)
