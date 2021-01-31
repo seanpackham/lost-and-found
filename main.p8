@@ -330,9 +330,6 @@ gameover = {
 }
 
 function _init()
-	sfx(-1)
-	sfx(1)
-
 	-- transparency color
 	palt(0, false)
 	palt(13, true)
@@ -354,9 +351,10 @@ function _init()
 
 	-- entities
 	add_loot("coin", 			5, 5, 32)
-	add_loot("rock", 			4, 5, 2)
 	add_loot("gold", 			3, 15, 12)
 	add_loot("gem", 				2, 20, 34)
+	-- add_loot("rock", 			4, 5, 2)
+
 	add_loot("skull", 		1, 25, 48)
 	add_trap("snake", 		3, 1, 66)
 	add_trap("spikes", 	1, 1, 14)
@@ -367,7 +365,7 @@ function _init()
 	add_loot("chest", 		1, 25, 40)
 
 	-- items
-	add_item("pick", 				7, 15, 100)
+	add_item("pick", 				7, 10, 100)
 	add_item("bomb", 				2, 30, 98)
 	add_item("vision", 		2, 20, 96)
 	-- add_item("antidote", 1, 15, 102)
