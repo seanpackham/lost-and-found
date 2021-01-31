@@ -3,483 +3,483 @@ version 29
 __lua__
 
 title = {
-	y = -30,
-	bob = 0,
-	update = function()
-		if btn(4) or btn(5) then state = game
-				sfx(-1)
-		end
+ y = -30,
+ bob = 0,
+ update = function()
+  if btn(4) or btn(5) then state = game
+   sfx(-1)
+  end
 
-		title.y = clamp(title.y + 1, -30, 28)
+  title.y = clamp(title.y + 1, -30, 28)
 
-		title.bob += 0.01
-	end,
+  title.bob += 0.01
+ end,
 
-	draw = function()
-		cls(13)
+ draw = function()
+  cls(13)
 
-		sspr(0, 64, 52, 32, 38, title.y)
-		sspr(52, 64, 76, 32, 24, title.y + 30)
+  sspr(0, 64, 52, 32, 38, title.y)
+  sspr(52, 64, 76, 32, 24, title.y + 30)
 
-		if title.y == 28 then
-			print("game by jon, sean & kyle", 15, 15, 15)
-			print("find the skull on lvl 5", 17, 100, 9)
-			print("z or x to start", 34, 115 + sin(title.bob) * 2, 15)
-		end
-	end
+  if title.y == 28 then
+   print("game by jon, sean & kyle", 15, 15, 15)
+   print("find the skull on lvl 5", 17, 100, 9)
+   print("z or x to start", 34, 115 + sin(title.bob) * 2, 15)
+  end
+ end
 }
 
 function use_pick(i)
-	if items[i].uses == 0 then
-		-- play no more uses sound
-		return
-	end
+ if items[i].uses == 0 then
+  -- play no more uses sound
+  return
+ end
 
-	local tile = tiles[cursor.x][cursor.y]
+ local tile = tiles[cursor.x][cursor.y]
 
-	if #tile.sprites == 1 then
-		items[i].uses -= 1
-		add(tile.sprites, dig_tile)
+ if #tile.sprites == 1 then
+  items[i].uses -= 1
+  add(tile.sprites, dig_tile)
 
-		if tile.e then
-			add(tile.sprites, tile.e)
+  if tile.e then
+   add(tile.sprites, tile.e)
 
-			if tile.e.name == "skull" then
-				-- play win sound
-				money += tile.e.value
-				state = win
-			elseif tile.e.type == "loot" then
-				-- play find treasure sound
-				sfx(6)
-				money += tile.e.value
-			else
-				-- play trigger trap sound
-				sfx(4)
-				shake += 0.07
-				workers -= tile.e.value
-			end
-		else
-			-- play pick grass sound
-			sfx(3)
-		end
-	else
-		-- play already dug sound
-	end
+   if tile.e.name == "skull" then
+    -- play win sound
+    money += tile.e.value
+    state = win
+   elseif tile.e.type == "loot" then
+    -- play find treasure sound
+    sfx(6)
+    money += tile.e.value
+   else
+    -- play trigger trap sound
+    sfx(4)
+    shake += 0.07
+    workers -= tile.e.value
+   end
+  else
+   -- play pick grass sound
+   sfx(3)
+  end
+ else
+  -- play already dug sound
+ end
 end
 
 function use_dynamite(i)
-	if items[i].uses == 0 then
-		-- play no more uses sound
-			sfx(7)
-		return
-	end
+ if items[i].uses == 0 then
+  -- play no more uses sound
+  sfx(7)
+  return
+ end
 
-	-- play dynamite sound
-	sfx(9)
-	items[i].uses -= 1
-	shake += 0.25
+ -- play dynamite sound
+ sfx(9)
+ items[i].uses -= 1
+ shake += 0.25
 
  for x = cursor.x - 1 , cursor.x + 1 do
-		for y = cursor.y - 1, cursor.y + 1 do
-			local tile = tiles[clamp(x, 1, 8)][clamp(y, 1, 7)]
+  for y = cursor.y - 1, cursor.y + 1 do
+   local tile = tiles[clamp(x, 1, 8)][clamp(y, 1, 7)]
 
-			if #tile.sprites == 1 then
-				add(tile.sprites, dig_tile)
+   if #tile.sprites == 1 then
+    add(tile.sprites, dig_tile)
 
-				if tile.e then
-					if tile.e.name == "skull" then
-						-- play win sound
-						money += tile.e.value
-						state = win
-					elseif tile.e.type == "loot" then
-						sfx(6)
-						money += tile.e.value
-						add(tile.sprites, tile.e)
-					else
-						-- dyanmite kill critters
-						if tile.e.name == "snake" or tile.e.name == "spider" then
-								tile.e = nil
-						-- still take environment damage
-						else
-							workers -= tile.e.value
-							add(tile.sprites, tile.e)
-						end
-					end
-				-- if entity
-				end
-			-- if not mined
-			end
+    if tile.e then
+     if tile.e.name == "skull" then
+      -- play win sound
+      money += tile.e.value
+      state = win
+     elseif tile.e.type == "loot" then
+      sfx(6)
+      money += tile.e.value
+      add(tile.sprites, tile.e)
+     else
+      -- dyanmite kill critters
+      if tile.e.name == "snake" or tile.e.name == "spider" then
+        tile.e = nil
+      -- still take environment damage
+      else
+       workers -= tile.e.value
+       add(tile.sprites, tile.e)
+      end
+     end
+    -- if entity
+    end
+   -- if not mined
+   end
 
-	 end
+  end
  end
 
 end
 
 function use_vision(i)
-	if items[i].uses == 0 then
-		-- play no more uses sound
-		sfx(7)
-		return
-	end
+ if items[i].uses == 0 then
+  -- play no more uses sound
+  sfx(7)
+  return
+ end
 
-	-- play vision sound
-		sfx(8)
-	items[i].uses -= 1
-	state = vision
-	return
+ -- play vision sound
+  sfx(8)
+ items[i].uses -= 1
+ state = vision
+ return
 end
 
 game = {
-	update = function()
-		-- movement
-		if btnp(0) then cursor.x -= 1 end
-		if btnp(1) then cursor.x += 1 end
-		if btnp(2) then cursor.y -= 1 end
-		if btnp(3) then cursor.y += 1 end
+ update = function()
+  -- movement
+  if btnp(0) then cursor.x -= 1 end
+  if btnp(1) then cursor.x += 1 end
+  if btnp(2) then cursor.y -= 1 end
+  if btnp(3) then cursor.y += 1 end
 
-		cursor.x = clamp(cursor.x, 1, 8)
-		cursor.y = clamp(cursor.y, 1, 7)
+  cursor.x = clamp(cursor.x, 1, 8)
+  cursor.y = clamp(cursor.y, 1, 7)
 
-		-- use
-		if btnp(4) then
-			if item == 1 then
-				use_pick(item)
-			elseif item == 2 then
-				use_dynamite(item)
-			elseif item == 3 then
-				use_vision(item)
-			end
-		end
+  -- use
+  if btnp(4) then
+   if item == 1 then
+    use_pick(item)
+   elseif item == 2 then
+    use_dynamite(item)
+   elseif item == 3 then
+    use_vision(item)
+   end
+  end
 
-		-- hotkeys
-		if btnp(0, 1) then
-			-- s
-			use_pick(1)
-		elseif btnp(3, 1) then
-			-- d
-			use_dynamite(2)
-		elseif btnp(1, 1) then
-			-- f
-			use_vision(3)
-		end
+  -- hotkeys
+  if btnp(0, 1) then
+   -- s
+   use_pick(1)
+  elseif btnp(3, 1) then
+   -- d
+   use_dynamite(2)
+  elseif btnp(1, 1) then
+   -- f
+   use_vision(3)
+  end
 
-		-- inventory
-		if btnp(5) then
-			state = inventory
-			return
-		end
+  -- inventory
+  if btnp(5) then
+   state = inventory
+   return
+  end
 
-		-- gameover
-		if workers <= 0 then
-			-- sfx(1)
-			state = gameover
-			return
-		end
+  -- gameover
+  if workers <= 0 then
+   -- sfx(1)
+   state = gameover
+   return
+  end
 
-		-- win hack to prevent shop triggering
-		if state == win then
-			return
-		end
+  -- win hack to prevent shop triggering
+  if state == win then
+   return
+  end
 
-		-- shop
-		if items[1].uses <= 0 and items[2].uses <= 0 then
-			state = shop
-			return
-		end
-	end,
+  -- shop
+  if items[1].uses <= 0 and items[2].uses <= 0 then
+   state = shop
+   return
+  end
+ end,
 
-	draw = function()
-		cls(13)
+ draw = function()
+  cls(13)
 
-		-- tiles
-		for x = 1, 8 do
-			for y = 1, 7 do
-				for k, v in pairs(tiles[x][y].sprites) do
-					draw_sprite(v.sprite, (x - 1) * 16, (y - 1) * 16)
-				end
-			end
-		end
+  -- tiles
+  for x = 1, 8 do
+   for y = 1, 7 do
+    for k, v in pairs(tiles[x][y].sprites) do
+     draw_sprite(v.sprite, (x - 1) * 16, (y - 1) * 16)
+    end
+   end
+  end
 
-		-- items
-		for k, v in pairs(items) do
-			x = (k - 1) * 16
-			y = 7 * 16
-			draw_sprite(v.sprite, x, y)
-			print(v.uses, x + 2, y + 2, 15)
-		end
+  -- items
+  for k, v in pairs(items) do
+   x = (k - 1) * 16
+   y = 7 * 16
+   draw_sprite(v.sprite, x, y)
+   print(v.uses, x + 2, y + 2, 15)
+  end
 
-		local ix = item - 1
-		local iy = 7 * 16
-		rect(ix * 16, iy, ix * 16 + 15, iy + 15, 15)
+  local ix = item - 1
+  local iy = 7 * 16
+  rect(ix * 16, iy, ix * 16 + 15, iy + 15, 15)
 
-		-- cursor
-		local cx = cursor.x - 1
-		local cy = cursor.y - 1
-		rect(cx * 16, cy * 16, cx * 16 + 15, cy * 16 + 15, 15)
+  -- cursor
+  local cx = cursor.x - 1
+  local cy = cursor.y - 1
+  rect(cx * 16, cy * 16, cx * 16 + 15, cy * 16 + 15, 15)
 
-		-- ui
-		ui.draw()
+  -- ui
+  ui.draw()
 
-	end
+ end
 }
 
 vision = {
-	delay = 0,
+ delay = 0,
 
-	update = function()
-		vision.delay += 1
+ update = function()
+  vision.delay += 1
 
-		if vision.delay > 45 - (level * 3) then
-			vision.delay = 0
-			state = game
-		end
-	end,
+  if vision.delay > 45 - (level * 3) then
+   vision.delay = 0
+   state = game
+  end
+ end,
 
-	draw = function()
-		game.draw()
+ draw = function()
+  game.draw()
 
-		for x = clamp(cursor.x - 1, 1, 8) , clamp(cursor.x + 1, 1, 8) do
-			for y = clamp(cursor.y - 1, 1, 7) , clamp(cursor.y + 1, 1, 7) do
-				local tile = tiles[x][y]
+  for x = clamp(cursor.x - 1, 1, 8) , clamp(cursor.x + 1, 1, 8) do
+   for y = clamp(cursor.y - 1, 1, 7) , clamp(cursor.y + 1, 1, 7) do
+    local tile = tiles[x][y]
 
-				if tile.e then
-					draw_sprite(tile.e.sprite, (x - 1) * 16, (y - 1) * 16)
-				end
-			end
-		end
-	end
+    if tile.e then
+     draw_sprite(tile.e.sprite, (x - 1) * 16, (y - 1) * 16)
+    end
+   end
+  end
+ end
 }
 
 inventory = {
-	update = function()
-		if btnp(0) or btnp(2) then item -= 1 end
-		if btnp(1) or btnp(3) then item += 1 end
+ update = function()
+  if btnp(0) or btnp(2) then item -= 1 end
+  if btnp(1) or btnp(3) then item += 1 end
 
-		item = clamp(item, 1, #items)
+  item = clamp(item, 1, #items)
 
-		if btnp(4) or btnp(5) then
-			state = game
-		end
-	end,
+  if btnp(4) or btnp(5) then
+   state = game
+  end
+ end,
 
-	draw = function()
-		game.draw()
+ draw = function()
+  game.draw()
 
-		local ix = item - 1
-		local iy = 7 * 16
-		rect(ix * 16, iy, ix * 16 + 15, iy + 15, 14)
-	end
+  local ix = item - 1
+  local iy = 7 * 16
+  rect(ix * 16, iy, ix * 16 + 15, iy + 15, 14)
+ end
 }
 
 ui = {
-	draw = function()
-		print("lvl " .. level, 80, 7 * 16 + 2, 7)
+ draw = function()
+  print("lvl " .. level, 80, 7 * 16 + 2, 7)
 
-		print("😐 " .. workers, 104, 7 * 16 + 2, 7)
-		print("$ " .. money, 80, 7 * 16 + 10, 7)
-	end
+  print("😐 " .. workers, 104, 7 * 16 + 2, 7)
+  print("$ " .. money, 80, 7 * 16 + 10, 7)
+ end
 }
 
 function buy_item(i)
-	if money >= items[item].value then
-		sfx(13)
-		money -= items[i].value
-		items[i].uses += 1
-	end
+ if money >= items[item].value then
+  sfx(13)
+  money -= items[i].value
+  items[i].uses += 1
+ end
 end
 
 shop = {
-	update = function()
-		if btnp(0) or btnp(2) then item -= 1 end
-		if btnp(1) or btnp(3) then item += 1 end
+ update = function()
+  if btnp(0) or btnp(2) then item -= 1 end
+  if btnp(1) or btnp(3) then item += 1 end
 
-		item = clamp(item, 1, #items)
+  item = clamp(item, 1, #items)
 
-		-- buy
-		if btnp(4) then
-				buy_item(item)
-		end
+  -- buy
+  if btnp(4) then
+    buy_item(item)
+  end
 
-		-- hotkeys
-		if btnp(0, 1) then
-			-- s
-			buy_item(1)
-		elseif btnp(3, 1) then
-			-- d
-			buy_item(2)
-		elseif btnp(1, 1) then
-			-- f
-			buy_item(3)
-		end
+  -- hotkeys
+  if btnp(0, 1) then
+   -- s
+   buy_item(1)
+  elseif btnp(3, 1) then
+   -- d
+   buy_item(2)
+  elseif btnp(1, 1) then
+   -- f
+   buy_item(3)
+  end
 
-		-- back to game
-		if items[1].uses > 0 or items[2].uses > 0 then
-			if btnp(5) then
-				level += 1
-				next_level()
-				state = game
-			end
-		end
-	end,
+  -- back to game
+  if items[1].uses > 0 or items[2].uses > 0 then
+   if btnp(5) then
+    level += 1
+    next_level()
+    state = game
+   end
+  end
+ end,
 
-	draw = function()
-		cls(13)
-		print("stock up adventurer", 26, 8, 7)
-		sspr(80, 32, 32, 32, 32, 12, 64, 64)
+ draw = function()
+  cls(13)
+  print("stock up adventurer", 26, 8, 7)
+  sspr(80, 32, 32, 32, 32, 12, 64, 64)
 
-		if items[1].uses > 0 or items[2].uses > 0 then
-			print("x to exit", 20, 120, 7)
-		end
+  if items[1].uses > 0 or items[2].uses > 0 then
+   print("x to exit", 20, 120, 7)
+  end
 
-		for k, v in pairs(items) do
-			local y = 82
-			local z = 7
-			print(v.uses, k * 16 + 6, y, 7)
-			draw_sprite(v.sprite, k * 16, y + z)
-			print("$" .. v.value, k * 16 + 2, y + z + 18, 7)
-			rect(item * 16, y + z, item * 16 + 15, y + z + 15, 15)
-		end
+  for k, v in pairs(items) do
+   local y = 82
+   local z = 7
+   print(v.uses, k * 16 + 6, y, 7)
+   draw_sprite(v.sprite, k * 16, y + z)
+   print("$" .. v.value, k * 16 + 2, y + z + 18, 7)
+   rect(item * 16, y + z, item * 16 + 15, y + z + 15, 15)
+  end
 
-		ui.draw()
-	end
+  ui.draw()
+ end
 }
 
 gameover = {
-	update = function()
-		if btnp(4) or btnp(5) then
-			_init()
-			sfx(-1)
-			state = game
-		end
-	end,
+ update = function()
+  if btnp(4) or btnp(5) then
+   _init()
+   sfx(-1)
+   state = game
+  end
+ end,
 
-	draw = function()
-		game.draw()
+ draw = function()
+  game.draw()
 
-		rectfill(20, 40, 108, 88, 0)
-		print("game over", 47, 56, 7)
-		print("z or x to restart", 31, 68, 7)
-	end
+  rectfill(20, 40, 108, 88, 0)
+  print("game over", 47, 56, 7)
+  print("z or x to restart", 31, 68, 7)
+ end
 }
 
 win = {
-	update = function()
-		if btnp(4) or btnp(5) then
-			_init()
-			sfx(-1)
-			state = game
-		end
-	end,
+ update = function()
+  if btnp(4) or btnp(5) then
+   _init()
+   sfx(-1)
+   state = game
+  end
+ end,
 
-	draw = function()
-		game.draw()
+ draw = function()
+  game.draw()
 
-		rectfill(20, 40, 108, 88, 9)
-		print("skull found!", 40, 56, 7)
-		print("z or x to restart", 31, 68, 7)
-	end
+  rectfill(20, 40, 108, 88, 9)
+  print("skull found!", 40, 56, 7)
+  print("z or x to restart", 31, 68, 7)
+ end
 }
 
 function _init()
-	sfx(-1)
-	sfx(1)
+ sfx(-1)
+ sfx(1)
 
-	-- transparency color
-	palt(0, false)
-	palt(13, true)
+ -- transparency color
+ palt(0, false)
+ palt(13, true)
 
-	-- globals
-	debug = false
-	shake = 0
-	entities = {}
-	grasses = {}
-	items = {}
-	cursor = { x = 4, y = 3 }
-	item = 1
-	level = 1
-	workers = 10
-	money = 25
+ -- globals
+ debug = false
+ shake = 0
+ entities = {}
+ grasses = {}
+ items = {}
+ cursor = { x = 4, y = 3 }
+ item = 1
+ level = 1
+ workers = 10
+ money = 25
 
-	dig_tile = add_tile("dig", 46)
-	key_tile = add_tile("key", 36)
+ dig_tile = add_tile("dig", 46)
+ key_tile = add_tile("key", 36)
 
-	-- entities
-	add_loot("coin", 			4, 10, 32)
-	add_loot("gold", 			3, 20, 12)
-	add_loot("gem", 				2, 25, 34)
-	add_loot("chest", 		1, 30, 38)
-	-- add_loot("rock", 			4, 5, 2)
+ -- entities
+ add_loot("coin", 			4, 10, 32)
+ add_loot("gold", 			3, 20, 12)
+ add_loot("gem", 				2, 25, 34)
+ add_loot("chest", 		1, 30, 38)
+ -- add_loot("rock", 			4, 5, 2)
 
-	add_loot("skull", 		1, 100, 40)
-	skull_entity = entities[#entities]
-	del(entities, skull_entity)
+ add_loot("skull", 		1, 100, 40)
+ skull_entity = entities[#entities]
+ del(entities, skull_entity)
 
-	add_trap("snake", 		3, 1, 66)
-	add_trap("spikes", 	1, 1, 14)
-	add_trap("spider", 	2, 1, 70)
-	add_trap("boulder", 2, 2, 72)
-	-- add_trap("skull", 		1, 2, 64)
+ add_trap("snake", 		3, 1, 66)
+ add_trap("spikes", 	1, 1, 14)
+ add_trap("spider", 	2, 1, 70)
+ add_trap("boulder", 2, 2, 72)
+ -- add_trap("skull", 		1, 2, 64)
 
-	-- items
-	add_item("pick", 				7, 10, 100)
-	add_item("bomb", 				2, 40, 98)
-	add_item("vision", 		2, 20, 96)
-	-- add_item("antidote", 1, 15, 102)
+ -- items
+ add_item("pick", 				7, 10, 100)
+ add_item("bomb", 				2, 40, 98)
+ add_item("vision", 		2, 20, 96)
+ -- add_item("antidote", 1, 15, 102)
 
-	-- grasses
-	add(grasses, add_tile("g1", 4))
-	add(grasses, add_tile("g2", 6))
-	add(grasses, add_tile("g3", 8))
-	add(grasses, add_tile("g4", 10))
+ -- grasses
+ add(grasses, add_tile("g1", 4))
+ add(grasses, add_tile("g2", 6))
+ add(grasses, add_tile("g3", 8))
+ add(grasses, add_tile("g4", 10))
 
-	-- generate next world based on level
-	next_level()
+ -- generate next world based on level
+ next_level()
 
-	state = title
+ state = title
 end
 
 function next_level()
-	-- globals
-	tiles = {}
-	spawns = {}
-	delay = 0
+ -- globals
+ tiles = {}
+ spawns = {}
+ delay = 0
 
-	-- spawns
-	-- todo: change based on level
-	for k, e in pairs(entities) do
-		for i = 1, e.spawn do
-			add(spawns, e)
-		end
-	end
-
-	-- tiles
-	for x = 1, 8 do
-		add(tiles, {})
-
-		for y = 1, 7 do
-			local tile = {
-				sprites = { grasses[flr(rnd(#grasses)) + 1] },
-			}
-
-			-- spawn loot or trap
-			-- todo: base on level
-			if (rnd(1) < 0.65) then
-				tile.e = spawns[flr(rnd(#spawns)) + 1]
-			end
-
-			add(tiles[x], tile)
-		end
+ -- spawns
+ -- todo: change based on level
+ for k, e in pairs(entities) do
+  for i = 1, e.spawn do
+   add(spawns, e)
+  end
  end
 
-	-- if level 5
-	if level == 5 then
-		tiles[flr(rnd(8)) + 1][flr(rnd(7)) + 1].e = skull_entity
-	end
+ -- tiles
+ for x = 1, 8 do
+  add(tiles, {})
+
+  for y = 1, 7 do
+   local tile = {
+    sprites = { grasses[flr(rnd(#grasses)) + 1] },
+   }
+
+   -- spawn loot or trap
+   -- todo: base on level
+   if (rnd(1) < 0.65) then
+    tile.e = spawns[flr(rnd(#spawns)) + 1]
+   end
+
+   add(tiles[x], tile)
+  end
+ end
+
+ -- if level 5
+ if level == 5 then
+  tiles[flr(rnd(8)) + 1][flr(rnd(7)) + 1].e = skull_entity
+ end
 
 end
 
 function _update()
-		state.update()
+  state.update()
 end
 
 function screen_shake()
@@ -499,46 +499,46 @@ function screen_shake()
 end
 
 function _draw()
-	screen_shake()
+ screen_shake()
 
-	-- debug
-	if debug and (state == game or state == inventory) then
-		vision.draw()
-	else
-			state.draw()
-	end
+ -- debug
+ if debug and (state == game or state == inventory) then
+  vision.draw()
+ else
+   state.draw()
+ end
 end
 
 function draw_sprite(sprite, x, y)
-	local sx = (sprite % 32) * 8
-	local sy = flr(sprite / 32) * 16
-	sspr(sx, sy, 16, 16, x, y)
+ local sx = (sprite % 32) * 8
+ local sy = flr(sprite / 32) * 16
+ sspr(sx, sy, 16, 16, x, y)
 end
 
 function add_loot(name, spawn, value, sprite)
-	add_entity("loot", name, spawn, value, sprite)
+ add_entity("loot", name, spawn, value, sprite)
 end
 
 function add_trap(name, spawn, value, sprite)
-	add_entity("trap", name, spawn, value, sprite)
+ add_entity("trap", name, spawn, value, sprite)
 end
 
 function add_entity(type, name, spawn, value, sprite)
-	add(entities, { type = type, name = name, spawn = spawn, value = value, sprite = sprite})
+ add(entities, { type = type, name = name, spawn = spawn, value = value, sprite = sprite})
 end
 
 function add_tile(name, sprite)
-	return { name = name, sprite = sprite }
+ return { name = name, sprite = sprite }
 end
 
 function add_item(name, uses, value, sprite)
-	add(items, { name = name, uses = uses, value = value, sprite = sprite })
+ add(items, { name = name, uses = uses, value = value, sprite = sprite })
 end
 
 function clamp(value, min, max)
-	if value < min then value = 1 end
-	if value > max then value = max end
-	return value
+ if value < min then value = 1 end
+ if value > max then value = max end
+ return value
 end
 
 __gfx__
@@ -794,4 +794,3 @@ __music__
 00 0a424344
 00 0b424344
 00 0a0b4344
-
