@@ -1,13 +1,15 @@
 pico-8 cartridge // http://www.pico-8.com
 version 29
 __lua__
-
+sfx(-1)
+sfx(1)
 title = {
 	y = -30,
 	bob = 0,
-
 	update = function()
-		if btn(4) or btn(5) then state = game end
+		if btn(4) or btn(5) then state = game
+				sfx(-1)
+		end
 
 		title.y = clamp(title.y + 1, -30, 28)
 
@@ -152,11 +154,13 @@ game = {
 		-- shop
 		if items[1].uses <= 0 and items[2].uses <= 0 then
 			state = shop
+		music(8)
 		end
 
 		-- gameover
 		if workers <= 0 then
 			state = gameover
+			sfx(1)
 		end
 	end,
 
