@@ -221,14 +221,13 @@ vision = {
 	draw = function()
 		game.draw()
 
-		for x = cursor.x - 1 , cursor.x + 1 do
-			for y = cursor.y - 1, cursor.y + 1 do
-				local tile = tiles[clamp(x, 1, 8)][clamp(y, 1, 7)]
+		for x = clamp(cursor.x - 1, 1, 8) , clamp(cursor.x + 1, 1, 8) do
+			for y = clamp(cursor.y - 1, 1, 7) , clamp(cursor.y + 1, 1, 7) do
+				local tile = tiles[x][y]
 
 				if tile.e then
 					draw_sprite(tile.e.sprite, (x - 1) * 16, (y - 1) * 16)
 				end
-
 			end
 		end
 	end
