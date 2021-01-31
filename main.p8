@@ -17,11 +17,16 @@ title = {
 	end
 }
 
-function use_pick()
+function use_pick(i)
+	if items[i].uses == 0 then
+		-- play no more uses sound
+		return
+	end
+
 	local tile = tiles[cursor.x][cursor.y]
 
 	if #tile.sprites == 1 then
-		items[item].uses -= 1
+		items[i].uses -= 1
 
 		if tile.e then
 			add(tile.sprites, tile.e)
@@ -45,13 +50,23 @@ function use_pick()
 	end
 end
 
-function use_dynamite()
+function use_dynamite(i)
+	if items[i].uses == 0 then
+		-- play no more uses sound
+		return
+	end
+
 	-- play dynamite sound
 end
 
-function use_vision()
+function use_vision(i)
+	if items[i].uses == 0 then
+		-- play no more uses sound
+		return
+	end
+
 	-- play vision sound
-	items[item].uses -= 1
+	items[i].uses -= 1
 	state = vision
 	return
 end
@@ -59,32 +74,39 @@ end
 game = {
 	update = function()
 		-- movement
-		if (not keys[0] and btn(0)) then cursor.x -= 1 end
-		if (not keys[1] and btn(1)) then cursor.x += 1 end
-		if (not keys[2] and btn(2)) then cursor.y -= 1 end
-		if (not keys[3] and btn(3)) then cursor.y += 1 end
+		if btnp(0) then cursor.x -= 1 end
+		if btnp(1) then cursor.x += 1 end
+		if btnp(2) then cursor.y -= 1 end
+		if btnp(3) then cursor.y += 1 end
 
 		cursor.x = clamp(cursor.x, 1, 8)
 		cursor.y = clamp(cursor.y, 1, 7)
 
 		-- use
-		if (not keys[4] and btn(4)) then
-			-- current item has uses left
-			if items[item].uses > 0 then
-				if item == 1 then
-					use_pick()
-				elseif item == 2 then
-					use_dynamite()
-				elseif item == 3 then
-					use_vision()
-				end
-			else
-				-- play no more uses sound
+		if btnp(4) then
+			if item == 1 then
+				use_pick(item)
+			elseif item == 2 then
+				use_dynamite(item)
+			elseif item == 3 then
+				use_vision(item)
 			end
 		end
 
+		-- hotkeys
+		if btnp(0, 1) then
+			-- s
+			use_pick(1)
+		elseif btnp(3, 1) then
+			-- d
+			use_dynamite(2)
+		elseif btnp(1, 1) then
+			-- f
+			use_vision(3)
+		end
+
 		-- inventory
-		if (not keys[5] and btn(5)) then
+		if btnp(5) then
 			state = inventory
 			-- state = shop
 		end
@@ -162,14 +184,12 @@ vision = {
 
 inventory = {
 	update = function()
-		if (not keys[0] and btn(0)) then item -= 1 end
-		if (not keys[1] and btn(1)) then item += 1 end
-		if (not keys[2] and btn(2)) then item -= 1 end
-		if (not keys[3] and btn(3)) then item += 1 end
+		if btnp(0) or btnp(2) then item -= 1 end
+		if btnp(1) or btnp(3) then item += 1 end
 
 		item = clamp(item, 1, #items)
 
-		if not keys[4] and btn(4) or not keys[5] and btn(5) then
+		if btnp(4) or btnp(5) then
 			state = game
 		end
 	end,
@@ -192,15 +212,13 @@ ui = {
 
 shop = {
 	update = function()
-		if (not keys[0] and btn(0)) then item -= 1 end
-		if (not keys[1] and btn(1)) then item += 1 end
-		if (not keys[2] and btn(2)) then item -= 1 end
-		if (not keys[3] and btn(3)) then item += 1 end
+		if btnp(0) or btnp(2) then item -= 1 end
+		if btnp(1) or btnp(3) then item += 1 end
 
 		item = clamp(item, 1, #items)
 
 		-- buy
-		if not keys[4] and btn(4) then
+		if btnp(4) then
 			if money >= items[item].value then
 				money -= items[item].value
 				items[item].uses += 1
@@ -208,7 +226,7 @@ shop = {
 		end
 
 		-- back to game
-		if not keys[5] and btn(5) then
+		if btnp(5) then
 			state = game
 		end
 	end,
@@ -234,7 +252,7 @@ shop = {
 
 gameover = {
 	update = function()
-		if not keys[4] and btn(4) or not keys[5] and btn(5) then
+		if btnp(4) or btnp(5) then
 			_init()
 			state = game
 		end
@@ -261,18 +279,11 @@ function _init()
 	entities = {}
 	grasses = {}
 	items = {}
-	keys = {}
-	hotkeys = {}
 	cursor = { x = 4, y = 3 }
 	item = 1
 	level = 1
 	workers = 10
 	money = 25
-
-	-- init old keys
-	for i = 0, 5 do
-		keys[i] = false
-	end
 
 	dig_tile = add_tile("dig", 46)
 	key_tile = add_tile("key", 36)
@@ -345,15 +356,6 @@ end
 
 function _update()
 		state.update()
-
-		-- update old keys
-		for i = 0, 5 do
-			keys[i] = btn(i)
-		end
-
-		for i = 0, 5 do
-			hotkeys[i] = btn(i, 2)
-		end
 end
 
 function _draw()
