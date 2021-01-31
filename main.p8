@@ -3,13 +3,13 @@ version 29
 __lua__
 
 title = {
-	y = -30,
+	y = -60,
 	bob = 0,
 
 	update = function()
 		if btn(4) or btn(5) then state = game end
 
-		title.y = clamp(title.y + 1, -30, 28)
+		title.y = clamp(title.y + 1, -60, 20)
 
 		title.bob += 0.01
 	end,
@@ -20,8 +20,10 @@ title = {
 		sspr(0, 64, 52, 32, 38, title.y)
 		sspr(52, 64, 76, 32, 24, title.y + 30)
 
-		if title.y == 28 then
-			print("z or x to start", 34, 105 + sin(title.bob) * 2, 15)
+		if title.y == 20 then
+			print("z or x to start", 34, 95 + sin(title.bob) * 2, 15)
+
+			print("created by: jon, sean, kyle", 10, 118, 7)
 		end
 
 	end
