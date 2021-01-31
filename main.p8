@@ -165,13 +165,14 @@ game = {
 		-- inventory
 		if btnp(5) then
 			state = inventory
-			-- state = shop
+			return
 		end
 
 		-- gameover
 		if workers <= 0 then
-			state = gameover
 			-- sfx(1)
+			state = gameover
+			return
 		end
 
 		-- win hack to prevent shop triggering
@@ -182,6 +183,7 @@ game = {
 		-- shop
 		if items[1].uses <= 0 and items[2].uses <= 0 then
 			state = shop
+			return
 		end
 	end,
 
