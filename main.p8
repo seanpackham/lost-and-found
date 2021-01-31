@@ -155,8 +155,6 @@ game = {
 
 		-- shop
 		if items[1].uses <= 0 and items[2].uses <= 0 then
-			sfx(-1)
-			sfx(1)
 			state = shop
 		end
 
@@ -273,10 +271,6 @@ shop = {
 
 		-- back to game
 		if items[1].uses > 0 or items[2].uses > 0 then
-			music(-1)
-			sfx(-1)
-			music(0)
-
 			if btnp(5) then
 				level += 1
 				next_level()
