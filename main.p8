@@ -358,7 +358,7 @@ function _init()
 	add_trap("spikes", 	1, 1, 14)
 	add_trap("spider", 	2, 1, 70)
 	add_trap("boulder", 2, 2, 72)
-	add_trap("skull", 		1, 2, 64)
+	-- add_trap("skull", 		1, 2, 64)
 
 	add_loot("chest", 		1, 25, 40)
 
