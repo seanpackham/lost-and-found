@@ -404,26 +404,26 @@ function _init()
  key_tile = add_tile("key", 36)
 
  -- entities
- add_loot("coin", 			4, 10, 32)
- add_loot("gold", 			3, 20, 12)
- add_loot("gem", 				2, 25, 34)
- add_loot("chest", 		1, 30, 38)
- -- add_loot("rock", 			4, 5, 2)
+ add_loot("coin", 4, 10, 32)
+ add_loot("gold", 3, 20, 12)
+ add_loot("gem", 2, 25, 34)
+ add_loot("chest", 1, 30, 38)
+ -- add_loot("rock", 4, 5, 2)
 
- add_loot("skull", 		1, 100, 40)
+ add_loot("skull", 1, 100, 40)
  skull_entity = entities[#entities]
  del(entities, skull_entity)
 
- add_trap("snake", 		3, 1, 66)
- add_trap("spikes", 	1, 1, 14)
- add_trap("spider", 	2, 1, 70)
+ add_trap("snake", 3, 1, 66)
+ add_trap("spikes", 1, 1, 14)
+ add_trap("spider", 2, 1, 70)
  add_trap("boulder", 2, 2, 72)
- -- add_trap("skull", 		1, 2, 64)
+ -- add_trap("skull", 1, 2, 64)
 
  -- items
- add_item("pick", 				7, 10, 100)
- add_item("bomb", 				2, 40, 98)
- add_item("vision", 		2, 20, 96)
+ add_item("pick", 7, 10, 100)
+ add_item("bomb", 2, 40, 98)
+ add_item("vision", 2, 20, 96)
  -- add_item("antidote", 1, 15, 102)
 
  -- grasses
